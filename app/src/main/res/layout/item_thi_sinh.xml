@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <RelativeLayout
+        android:id="@+id/item_thi_sinh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/tv_ten_ts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:text="Tên thí sinh"
+            android:textColor="@color/black"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_sbd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/tv_ten_ts"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_bt"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingBottom="6dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="6dp"
+            android:text="Số báo danh"
+            android:textColor="@color/white"
+            android:textSize="16dp" />
+
+        <TextView
+            android:id="@+id/tv_lop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_ten_ts"
+            android:layout_marginRight="8dp"
+            android:backgroundTint="@color/gray2"
+            android:layout_marginTop="8dp"
+            android:layout_toLeftOf="@+id/tv_sbd"
+            android:background="@drawable/bg_bt"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingBottom="6dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="6dp"
+            android:text="TK1"
+            android:textColor="@color/white"
+            android:textSize="16dp" />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

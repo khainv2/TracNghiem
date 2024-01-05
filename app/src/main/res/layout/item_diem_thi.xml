@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <RelativeLayout
+        android:id="@+id/item_thi_sinh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/tv_sbd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/bg_bt"
+            android:backgroundTint="@color/gray2"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingBottom="6dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="6dp"
+            android:textColor="@color/white"
+            android:text="SBD: 123456"
+            android:textSize="16dp" />
+
+        <TextView
+            android:id="@+id/tv_ten_ts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/tv_sbd"
+            android:maxLines="1"
+            android:text="Tên thí sinh"
+            android:textColor="@color/black"
+            android:textSize="16dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:textSize="12dp"
+            android:id="@+id/tv_diem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/tv_sbd"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_bt"
+            android:gravity="center"
+            android:paddingBottom="6dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="6dp"
+            android:text="10 Điểm"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:textSize="12dp"
+            android:id="@+id/tv_ma_de"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_sbd"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_toLeftOf="@+id/tv_diem"
+            android:background="@drawable/bg_bt"
+            android:backgroundTint="@color/gray2"
+            android:gravity="center"
+            android:paddingBottom="6dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="6dp"
+            android:text="853"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/tv_ten_bai_thi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_sbd"
+            android:layout_marginTop="8dp"
+            android:layout_toLeftOf="@+id/tv_ma_de"
+            android:maxLines="1"
+            android:text="Bài thi môn"
+            android:textColor="@color/black"
+            android:textSize="16dp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

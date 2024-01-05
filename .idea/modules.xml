@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/DATN_ChamThiTracNghiem_OCV.iml" filepath="$PROJECT_DIR$/DATN_ChamThiTracNghiem_OCV.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/DATN_ChamThiTracNghiem_OCV.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/DATN_ChamThiTracNghiem_OCV.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/DATN_ChamThiTracNghiem_OCV.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/DATN_ChamThiTracNghiem_OCV.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/DATN_ChamThiTracNghiem_OCV.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/DATN_ChamThiTracNghiem_OCV.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/DATN_ChamThiTracNghiem_OCV.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/DATN_ChamThiTracNghiem_OCV.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rsmanager-release/DATN_ChamThiTracNghiem_OCV.rsmanager-release.iml" filepath="$PROJECT_DIR$/.idea/modules/rsmanager-release/DATN_ChamThiTracNghiem_OCV.rsmanager-release.iml" />
+    </modules>
+  </component>
+</project>
