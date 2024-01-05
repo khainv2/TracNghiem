@@ -305,27 +305,6 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         return true;
     }
 
-    void sortList(List<Integer> list){
-        for (int i = 0; i < list.size(); i++){
-            for (int j = i + 1; j < list.size(); j++){
-                if (list.get(i) > list.get(j)){
-                    int temp = list.get(i);
-                    list.set(i, list.get(j));
-                    list.set(j, temp);
-                }
-            }
-        }
-    }
-
-
-
-    void updateTopPointsAndRightPoints(List<Point> topPoints, List<Point> rightPoints){
-
-
-
-
-    }
-
     private static final double MIN_RECTANGLE_AREA = 5000; // Adjust this threshold as needed
     private Mat processFrame(Mat inputFrame) {
         // Draw text center frame
@@ -461,9 +440,10 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
             return inputFrame;
         }
 
-        // draw rect of 4 points tl, tr, bl, br
+        double distanceTLTR = distance(tl, tr);
         for (int i = 0; i < topPoints.size() - 1; i++){
             double d = distance(topPoints.get(i), topPoints.get(i + 1));
+            double ratio = d / distanceTLTR;
 
         }
 
@@ -484,9 +464,6 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         Imgproc.line(inputFrame, bl, tl, new Scalar(0, 0, 0), 1);
 
 
-
-
-        double distanceTLTR = distance(tl, tr);
         for (int i = 0; i < topPoints.size(); i++){
             double distanceTopToTL = distance(topPoints.get(i), tl);
             Point refPointBottom = new Point(bl.x + (br.x - bl.x) * distanceTopToTL / distanceTLTR,
