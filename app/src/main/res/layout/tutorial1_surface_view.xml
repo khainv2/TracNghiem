@@ -1,14 +1,36 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
 
     <org.opencv.android.JavaCameraView
         android:id="@+id/activity_camera"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
+        android:layout_toLeftOf="@id/linearLayout"
         opencv:camera_id="any"
         opencv:show_fps="true" />
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:rotation="-90"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        >
+        <TextView
+            android:id="@+id/textViewInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="" />
+        <Button
+            android:id="@+id/btCapture"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Capture" />
 
-</FrameLayout>
+    </LinearLayout>
+
+</RelativeLayout>
