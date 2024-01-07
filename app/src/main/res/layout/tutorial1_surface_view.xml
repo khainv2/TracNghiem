@@ -12,9 +12,10 @@
         opencv:camera_id="any"
         opencv:show_fps="true" />
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/linearLayout"
         android:rotation="-90"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentRight="true"

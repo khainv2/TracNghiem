@@ -12,7 +12,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.khainv9.tracnghiem.R;
 
@@ -28,7 +27,6 @@ import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -37,6 +35,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class CameraActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
@@ -101,8 +100,8 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
         //lấy vị trí của bài thi trong intent gửi đến
         int i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-        baiThi = Utils.dsBaiThi.get(i);
-        Toast.makeText(this, "Chạm để bắt đầu chấm bài", Toast.LENGTH_SHORT).show();
+//        baiThi = Utils.dsBaiThi.get(i);
+//        Toast.makeText(this, "Chạm để bắt đầu chấm bài", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -337,6 +336,11 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         // Calculate the determinant
         double det = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
 
+        // If the determinant is zero, the lines are parallel
+        if (det == 0) {
+            return null;
+        }
+
         // Calculate the intersection point
         double intersectionX = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / det;
         double intersectionY = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / det;
@@ -345,6 +349,92 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
     }
 
     private static final double MIN_RECTANGLE_AREA = 500; // Adjust this threshold as needed
+
+    class Line {
+        Point p1, p2;
+    }
+    List<Line> findMidPoints(Point p1, Point p2, Point p3, Point p4, Point pCenter, Point pFar, int depth){
+        if (depth == 0){
+            return new ArrayList<>();
+        }
+        Line line = new Line();
+        if (pFar == null){
+            line.p1 = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+            line.p2 = new Point((p3.x + p4.x) / 2, (p3.y + p4.y) / 2);
+        } else {
+            line.p1 = calculateIntersection(p1, p2, pCenter, pFar);
+            line.p2 = calculateIntersection(p3, p4, pCenter, pFar);
+        }
+        List<Line> lines = new ArrayList<>();
+        lines.add(line);
+        Point center1 = calculateIntersection(p1, line.p2, line.p1, p4);
+        List<Line> lines1 = findMidPoints(p1, line.p1, line.p2, p4, center1, pFar, depth - 1);
+        Point center2 = calculateIntersection(line.p1, p3, p2, line.p2);
+        List<Line> lines2 = findMidPoints(line.p1, p2, p3, line.p2, center2, pFar, depth - 1);
+        lines.addAll(lines1);
+        lines.addAll(lines2);
+        return lines;
+    }
+
+    private Mat processTestFrame(Mat inputFrame){
+        // Clear all input frame
+        inputFrame.setTo(new Scalar(255, 255, 255));
+
+        Point p1 = new Point(223, 163);
+        Point p2 = new Point(1231, 163);
+        Point p3 = new Point(1223, 875);
+        Point p4 = new Point(223, 868);
+
+        // {223.0, 163.0} {1231.0, 163.0} {223.0, 868.0} {1223.0, 875.0}
+//
+//        Point p1 = new Point(800, 50);
+//        Point p2 = new Point(100, 500);
+//        Point p3 = new Point(840, 1020);
+//        Point p4 = new Point(1700, 200);
+//
+//        Point p1 = new Point(100, 100);
+//        Point p2 = new Point(900, 100);
+//        Point p3 = new Point(900, 500);
+//        Point p4 = new Point(100, 500);
+
+        Imgproc.line(inputFrame, p1, p2, new Scalar(0, 0, 0), 2);
+        Imgproc.line(inputFrame, p2, p3, new Scalar(0, 0, 0), 2);
+        Imgproc.line(inputFrame, p3, p4, new Scalar(0, 0, 0), 2);
+        Imgproc.line(inputFrame, p4, p1, new Scalar(0, 0, 0), 2);
+
+        Imgproc.putText(inputFrame, "A", p1, Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 0), 2);
+        Imgproc.putText(inputFrame, "B", p2, Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 0), 2);
+        Imgproc.putText(inputFrame, "C", p3, Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 0), 2);
+        Imgproc.putText(inputFrame, "D", p4, Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 0), 2);
+
+        Point pCenter = calculateIntersection(p1, p3, p2, p4);
+        Point pFar1 = calculateIntersection(p1, p4, p2, p3);
+        Point pFar2 = calculateIntersection(p1, p2, p3, p4);
+
+
+        long startTime = System.currentTimeMillis();
+        List<Line> vLines = findMidPoints(p1, p2, p3, p4, pCenter, pFar1, 6);
+        List<Line> hLines = findMidPoints(p1, p4, p3, p2, pCenter, pFar2, 6);
+        Log.d("MyLog", "Time to find lines: " + (System.currentTimeMillis() - startTime) + "ms");
+        Imgproc.putText(inputFrame, "Lines: " + vLines.size(), new Point(120, 120), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 0), 2);
+        for (Line line : vLines){
+            Imgproc.line(inputFrame, line.p1, line.p2, new Scalar(0, 0, 255), 2);
+        }
+        for (Line line : hLines){
+            Imgproc.line(inputFrame, line.p1, line.p2, new Scalar(0, 0, 255), 2);
+        }
+
+//        Imgproc.circle(inputFrame, pCenter, 12, new Scalar(0, 0, 255), 2);
+//        if (pFar1 != null)
+//            Imgproc.circle(inputFrame, pFar1, 12, new Scalar(0, 0, 255), 2);
+
+
+//        Point pCenter = calculateIntersection(p1, p2, p3, p4);
+//        Point pFar = calculateIntersection(p1, p3, p2, p4);
+
+        return inputFrame;
+    }
+
     private Mat processFrame(Mat inputFrame) {
         // Create timer to measure processing time
         long startTime = System.currentTimeMillis();
@@ -514,6 +604,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         Point tl = topPoints.get(0);
         Point tr = topPoints.get(topPoints.size() - 1);
         Point br = rightPoints.get(rightPoints.size() - 1);
+
         final int DeltaAngle = 4;
         double angleTR = Math.atan2(tr.y - br.y, tr.x - br.x) - Math.atan2(tr.y - tl.y, tr.x - tl.x);
         double angleTRDegree = Math.abs(Math.toDegrees(angleTR));
@@ -561,7 +652,6 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         double ratioCenterTop = (centerTop.x - tl.x) / (tr.x - tl.x);
         double ratioCenterRight = (centerRight.y - tr.y) / (br.y - tr.y);
 
-
         if (ratioCenterTop < 0.48 || ratioCenterTop > 0.52 || ratioCenterRight < 0.53 || ratioCenterRight > 0.57){
             textDisplay += "NOT VALID due to center ratio";
             Imgproc.putText(inputFrame, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
@@ -582,57 +672,140 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         Imgproc.circle(inputFrame, bl, 12, new Scalar(255, 0, 0), 2);
         Imgproc.circle(inputFrame, br, 12, new Scalar(255, 0, 0), 2);
 
-        {
-            String examCode = "";
-            // Ma de thi
-            Point rTL = new Point(0.077987421, 0.047534165);
-            Point rBR = new Point(0.288050314, 0.10932858);
+        Point pCenter = calculateIntersection(tl, br, tr, bl);
+        Point pFar1 = calculateIntersection(tl, bl, tr, br);
+        Point pFar2 = calculateIntersection(tl, tr, br, bl);
+        List<Line> vLines = findMidPoints(tl, tr, br, bl, pCenter, pFar1, 10);
+        List<Line> hLines = findMidPoints(tl, bl, br, tr, pCenter, pFar2, 10);
 
-            int[] codes = new int[]{ -1, -1, -1 };
-            for (int index = 0; index < 3; index++){
-                for (int row = 0; row < 10; row++){
-                    Point p1 = new Point(rTL.x + (rBR.x - rTL.x) * row / 10, rTL.y + (rBR.y - rTL.y) * index / 3);
-                    Point p2 = new Point(rTL.x + (rBR.x - rTL.x) * (row + 1) / 10, rTL.y + (rBR.y - rTL.y) * index / 3);
-                    Point p3 = new Point(rTL.x + (rBR.x - rTL.x) * (row + 1) / 10, rTL.y + (rBR.y - rTL.y) * (index + 1) / 3);
-                    Point p4 = new Point(rTL.x + (rBR.x - rTL.x) * row / 10, rTL.y + (rBR.y - rTL.y) * (index + 1) / 3);
+        // Sort list vLines and hLines
+        Collections.sort(vLines, (o1, o2) -> Double.compare(o1.p1.x, o2.p1.x));
+        Collections.sort(hLines, (o1, o2) -> Double.compare(o1.p1.y, o2.p1.y));
 
-                    Point ref1 = calculatePointRef(tl, tr, bl, br, p1.x, p1.y);
-                    Point ref2 = calculatePointRef(tl, tr, bl, br, p2.x, p2.y);
-                    Point ref3 = calculatePointRef(tl, tr, bl, br, p3.x, p3.y);
-                    Point ref4 = calculatePointRef(tl, tr, bl, br, p4.x, p4.y);
+        String pointMarks = "0.080922432\t0.048722519\t0.290566038\t0.110516934\t10\t3\n" +
+                "0.080922432\t0.146761735\t0.290566038\t0.270350564\t10\t6\n" +
+                "0.353878407\t0.77540107\t0.533333333\t0.947712418\t10\t4\n" +
+                "0.353878407\t0.536541889\t0.533333333\t0.707070707\t10\t4\n" +
+                "0.353878407\t0.297088532\t0.533333333\t0.467023173\t10\t4\n" +
+                "0.353878407\t0.058229352\t0.533333333\t0.22875817\t10\t4\n" +
+                "0.602515723\t0.86631016\t0.677148847\t0.944741533\t4\t2\n" +
+                "0.602515723\t0.777183601\t0.677148847\t0.862150921\t4\t2\n" +
+                "0.602515723\t0.629233512\t0.677148847\t0.707664884\t4\t2\n" +
+                "0.602515723\t0.540701129\t0.677148847\t0.625074272\t4\t2\n" +
+                "0.602515723\t0.389780154\t0.677148847\t0.469399881\t4\t2\n" +
+                "0.602515723\t0.301841949\t0.677148847\t0.386215092\t4\t2\n" +
+                "0.602515723\t0.151515152\t0.677148847\t0.229352347\t4\t2\n" +
+                "0.602515723\t0.066547831\t0.677148847\t0.146167558\t4\t2\n" +
+                "0.758071279\t0.841354724\t0.974004193\t0.943553179\t12\t4\n" +
+                "0.758071279\t0.689245395\t0.974004193\t0.79144385\t12\t4\n" +
+                "0.758071279\t0.535947712\t0.974004193\t0.638146168\t12\t4\n" +
+                "0.758071279\t0.383838384\t0.974004193\t0.486036839\t12\t4\n" +
+                "0.758071279\t0.230540701\t0.974004193\t0.33392751\t12\t4\n" +
+                "0.758071279\t0.07902555\t0.974004193\t0.180629828\t12\t4\n";
+       String[] lines = pointMarks.split("\n");
+       for (String line : lines) {
+           String[] values = line.split("\t");
+           double x = Double.parseDouble(values[0]);
+           double y = Double.parseDouble(values[1]);
+           double x1 = Double.parseDouble(values[2]);
+           double y1 = Double.parseDouble(values[3]);
+           int w = Integer.parseInt(values[4]);
+           int h = Integer.parseInt(values[5]);
 
-                    Imgproc.line(inputFrame, ref1, ref2, new Scalar(255, 0, 0), 2);
-                    Imgproc.line(inputFrame, ref2, ref3, new Scalar(255, 0, 0), 2);
-                    Imgproc.line(inputFrame, ref3, ref4, new Scalar(255, 0, 0), 2);
-                    Imgproc.line(inputFrame, ref4, ref1, new Scalar(255, 0, 0), 2);
+           Point rTL = new Point(x, y);
+           Point rBR = new Point(x1, y1);
 
-                    Rect interest = new Rect(ref1, ref3);
-                    Mat roi = new Mat(grayImage, interest);
-                    Imgproc.GaussianBlur(roi, roi, new Size(5, 5), 0);
-                    Imgproc.threshold(roi, roi, 150, 255, Imgproc.THRESH_BINARY);
+           for (int index = 0; index < h; index++) {
+               for (int row = 0; row < w; row++) {
+                   Point p1 = new Point(rTL.x + (rBR.x - rTL.x) * row / w, rTL.y + (rBR.y - rTL.y) * index / h);
+                   Point p2 = new Point(rTL.x + (rBR.x - rTL.x) * (row + 1) / w, rTL.y + (rBR.y - rTL.y) * index / h);
+                   Point p3 = new Point(rTL.x + (rBR.x - rTL.x) * (row + 1) / w, rTL.y + (rBR.y - rTL.y) * (index + 1) / h);
+                   Point p4 = new Point(rTL.x + (rBR.x - rTL.x) * row / w, rTL.y + (rBR.y - rTL.y) * (index + 1) / h);
 
-                    Scalar mean = Core.mean(roi);
-                    double meanValue = mean.val[0];
-                    if (meanValue < ThresholdMean){
-                        codes[2 - index] = row;
-                    }
-                }
-            }
-            boolean isValid = true;
-            for (int i = 0; i < 3; i++){
-                if (codes[i] == -1){
-                    examCode += "X";
-                    isValid = false;
-                } else {
-                    examCode += codes[i];
-                }
-            }
-            if (!isValid){
-                examCode += " - NOT VALID";
-            }
-            final String finalExamCode = examCode;
-            runOnUiThread(() -> textViewInfo.setText("Mã đề thi: " + finalExamCode));
-        }
+                   if (p1.x < 0 || p1.x >= 1 || p1.y < 0 || p1.y >= 1
+                           || p2.x < 0 || p2.x >= 1 || p2.y < 0 || p2.y >= 1
+                           || p3.x < 0 || p3.x >= 1 || p3.y < 0 || p3.y >= 1
+                           || p4.x < 0 || p4.x >= 1 || p4.y < 0 || p4.y >= 1){
+                       continue;
+                   }
+
+                   Line vline1 = vLines.get((int) (p1.x * vLines.size()));
+                   Line hLine1 = hLines.get((int) (p1.y * hLines.size()));
+                   Point ref1 = calculateIntersection(vline1.p1, vline1.p2, hLine1.p1, hLine1.p2);
+
+                   Line vline2 = vLines.get((int) (p2.x * vLines.size()));
+                   Line hLine2 = hLines.get((int) (p2.y * hLines.size()));
+                   Point ref2 = calculateIntersection(vline2.p1, vline2.p2, hLine2.p1, hLine2.p2);
+
+                   Line vline3 = vLines.get((int) (p3.x * vLines.size()));
+                   Line hLine3 = hLines.get((int) (p3.y * hLines.size()));
+                   Point ref3 = calculateIntersection(vline3.p1, vline3.p2, hLine3.p1, hLine3.p2);
+
+                   Line vline4 = vLines.get((int) (p4.x * vLines.size()));
+                   Line hLine4 = hLines.get((int) (p4.y * hLines.size()));
+                   Point ref4 = calculateIntersection(vline4.p1, vline4.p2, hLine4.p1, hLine4.p2);
+
+
+                   Imgproc.line(inputFrame, ref1, ref2, new Scalar(255, 0, 0), 2);
+                   Imgproc.line(inputFrame, ref2, ref3, new Scalar(255, 0, 0), 2);
+                   Imgproc.line(inputFrame, ref3, ref4, new Scalar(255, 0, 0), 2);
+                   Imgproc.line(inputFrame, ref4, ref1, new Scalar(255, 0, 0), 2);
+               }
+           }
+       }
+
+
+//        {
+//            String examCode = "";
+//            // Ma de thi
+//            Point rTL = new Point(0.077987421, 0.047534165);
+//            Point rBR = new Point(0.288050314, 0.10932858);
+//
+//            int[] codes = new int[]{ -1, -1, -1 };
+//            for (int index = 0; index < 3; index++){
+//                for (int row = 0; row < 10; row++){
+//                    Point p1 = new Point(rTL.x + (rBR.x - rTL.x) * row / 10, rTL.y + (rBR.y - rTL.y) * index / 3);
+//                    Point p2 = new Point(rTL.x + (rBR.x - rTL.x) * (row + 1) / 10, rTL.y + (rBR.y - rTL.y) * index / 3);
+//                    Point p3 = new Point(rTL.x + (rBR.x - rTL.x) * (row + 1) / 10, rTL.y + (rBR.y - rTL.y) * (index + 1) / 3);
+//                    Point p4 = new Point(rTL.x + (rBR.x - rTL.x) * row / 10, rTL.y + (rBR.y - rTL.y) * (index + 1) / 3);
+//
+//                    Point ref1 = calculatePointRef(tl, tr, bl, br, p1.x, p1.y);
+//                    Point ref2 = calculatePointRef(tl, tr, bl, br, p2.x, p2.y);
+//                    Point ref3 = calculatePointRef(tl, tr, bl, br, p3.x, p3.y);
+//                    Point ref4 = calculatePointRef(tl, tr, bl, br, p4.x, p4.y);
+//
+//                    Imgproc.line(inputFrame, ref1, ref2, new Scalar(255, 0, 0), 2);
+//                    Imgproc.line(inputFrame, ref2, ref3, new Scalar(255, 0, 0), 2);
+//                    Imgproc.line(inputFrame, ref3, ref4, new Scalar(255, 0, 0), 2);
+//                    Imgproc.line(inputFrame, ref4, ref1, new Scalar(255, 0, 0), 2);
+//
+//                    Rect interest = new Rect(ref1, ref3);
+//                    Mat roi = new Mat(grayImage, interest);
+//                    Imgproc.GaussianBlur(roi, roi, new Size(5, 5), 0);
+//                    Imgproc.threshold(roi, roi, 150, 255, Imgproc.THRESH_BINARY);
+//
+//                    Scalar mean = Core.mean(roi);
+//                    double meanValue = mean.val[0];
+//                    if (meanValue < ThresholdMean){
+//                        codes[2 - index] = row;
+//                    }
+//                }
+//            }
+//            boolean isValid = true;
+//            for (int i = 0; i < 3; i++){
+//                if (codes[i] == -1){
+//                    examCode += "X";
+//                    isValid = false;
+//                } else {
+//                    examCode += codes[i];
+//                }
+//            }
+//            if (!isValid){
+//                examCode += " - NOT VALID";
+//            }
+//            final String finalExamCode = examCode;
+//            runOnUiThread(() -> textViewInfo.setText("Mã đề thi: " + finalExamCode));
+//        }
 
 
         // Draw all right points, top points and bottom left points
@@ -645,7 +818,6 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         for (Point point : bottomLeftPoints){
             Imgproc.circle(inputFrame, point, 5, new Scalar(0, 255, 255), 2);
         }
-//
         Imgproc.putText(inputFrame, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
 
         return inputFrame;
