@@ -12,14 +12,13 @@
         opencv:camera_id="any"
         opencv:show_fps="true" />
     <LinearLayout
-        android:visibility="gone"
         android:id="@+id/linearLayout"
-        android:rotation="-90"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
+
         >
         <TextView
             android:id="@+id/textViewInfo"
@@ -28,8 +27,8 @@
             android:text="" />
         <Button
             android:id="@+id/btCapture"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
             android:text="Capture" />
 
     </LinearLayout>

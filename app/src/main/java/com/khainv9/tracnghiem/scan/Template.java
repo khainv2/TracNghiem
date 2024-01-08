@@ -1,323 +1,120 @@
 package com.khainv9.tracnghiem.scan;
 
-import android.util.Log;
-
-import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static com.khainv9.tracnghiem.models.DeThi.A;
-import static com.khainv9.tracnghiem.models.DeThi.B;
-import static com.khainv9.tracnghiem.models.DeThi.C;
-import static com.khainv9.tracnghiem.models.DeThi.D;
-import static com.khainv9.tracnghiem.models.DeThi.NOT;
+class SectionArea {
+    double xMin, yMin, xMax, yMax;
+    int numRow, numCol;
+    int type = 0; // 0: horizontal, 1: vertical, 2: horizontal with exception
+}
+
+class PointMark {
+    Point point;
+    int col, row;
+    int type;
+}
+
+
+class Section {
+    List<PointMark> pointMarks = new ArrayList<>();
+    int type;
+    List<Integer> values = new ArrayList<>();
+}
+class ExamPaper {
+    List<Section> sections = new ArrayList<>();
+    String examCode = "";
+    String studentId = "";
+    String chapter1Answer = ""; // A B C D
+    String chapter2Answer = ""; // T F
+    String chapter3Answer = ""; // - , 0 1 2 3 4 5 6 7 8 9
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Exam code: " + examCode + "\n");
+        sb.append("Student id: " + studentId + "\n");
+        sb.append("Chapter 1: " + chapter1Answer + "\n");
+        sb.append("Chapter 2: " + chapter2Answer + "\n");
+        sb.append("Chapter 3: " + chapter3Answer + "\n");
+        return sb.toString();
+    }
+}
 
 public class Template {
     String TAG = getClass().getSimpleName();
-    //Tọa độ trên camera (theo %)
-    //điểm bắt đầu khu vực quét câu trả lời (điểm 1A, 11A, 21A, 31A,...)
-    public double[] SAX, SAY;
-    //khoảng cách câu
-    public double kcX, kcY;
-    //kích thước ô quét (màu xanh)
-    public double cellSize;
-    //tọa độ bắt đầu mã đề, số báo danh
-    public double mdX, mdY, sbdX, sbdY;
-    int DARK_COLOR = 110;
 
-    public static Template createTemplate20() {
-        double tw, th;
-        //tọa độ thử nghiệm câu 1A
-        double tspX, tspY;
-        //tọa độ thử nghiệm câu 10A
-        double tlpX, tlpY;
-        //tạo template
+    public List<SectionArea> sectionAreas = new ArrayList<>();
+    public int fixedTop = 40;
+    public int fixedRight = 18;
+    public int fixedBottomLeft = 1;
+
+    public static Template createDefaultTemplate(){
         Template template = new Template();
-        //khởi tạo các giá trị đã test trên thực tế
-        tw = 2706.0; //chiều rộng thử nghiệm
-        th = 1832.0; //chiều cao thử nghiệm
+        String pointMarks = "0.0809224318658281\t0.0487225193107546\t0.290566037735849\t0.110516934046346\t10\t3\t0\n" +
+                "0.0809224318658281\t0.146761734997029\t0.290566037735849\t0.270350564468211\t10\t6\t1\n" +
+                "0.353878406708595\t0.775401069518717\t0.533333333333333\t0.947712418300653\t10\t4\t2\n" +
+                "0.353878406708595\t0.536541889483066\t0.533333333333333\t0.707070707070707\t10\t4\t2\n" +
+                "0.353878406708595\t0.29708853238265\t0.533333333333333\t0.467023172905526\t10\t4\t2\n" +
+                "0.353878406708595\t0.0582293523469994\t0.533333333333333\t0.22875816993464\t10\t4\t2\n" +
+                "0.60251572327044\t0.866310160427807\t0.677148846960168\t0.944741532976827\t4\t2\t3\n" +
+                "0.60251572327044\t0.777183600713012\t0.677148846960168\t0.86215092097445\t4\t2\t3\n" +
+                "0.60251572327044\t0.629233511586453\t0.677148846960168\t0.707664884135472\t4\t2\t3\n" +
+                "0.60251572327044\t0.540701128936423\t0.677148846960168\t0.625074272133096\t4\t2\t3\n" +
+                "0.60251572327044\t0.389780154486037\t0.677148846960168\t0.469399881164587\t4\t2\t3\n" +
+                "0.60251572327044\t0.301841948900772\t0.677148846960168\t0.386215092097445\t4\t2\t3\n" +
+                "0.60251572327044\t0.151515151515152\t0.677148846960168\t0.229352346999406\t4\t2\t3\n" +
+                "0.60251572327044\t0.0665478312537136\t0.677148846960168\t0.146167557932264\t4\t2\t3\n" +
+                "0.758071278825996\t0.841354723707665\t0.974004192872117\t0.943553178847296\t12\t4\t4\n" +
+                "0.758071278825996\t0.689245395127748\t0.974004192872117\t0.79144385026738\t12\t4\t4\n" +
+                "0.758071278825996\t0.535947712418301\t0.974004192872117\t0.638146167557932\t12\t4\t4\n" +
+                "0.758071278825996\t0.383838383838384\t0.974004192872117\t0.486036838978015\t12\t4\t4\n" +
+                "0.758071278825996\t0.230540701128936\t0.974004192872117\t0.333927510398099\t12\t4\t4\n" +
+                "0.758071278825996\t0.0790255496137849\t0.974004192872117\t0.180629827688651\t12\t4\t4\n";
 
-        //tọa độ khu vực quét test 1
-        tspX = 1912.0;//câu 1A (x)
-        tspY = 1296.0;//câu 1A 󰀀
-        tlpX = 2687.0;//câu 10A (x)
-        tlpY = 1074.0;//câu 10A 󰀀
+        String[] lines = pointMarks.split("\n");
+        for (String line : lines) {
+            String[] values = line.split("\t");
+            double x = Double.parseDouble(values[0]);
+            double y = Double.parseDouble(values[1]);
+            double x1 = Double.parseDouble(values[2]);
+            double y1 = Double.parseDouble(values[3]);
+            int w = Integer.parseInt(values[4]);
+            int h = Integer.parseInt(values[5]);
+            int type = Integer.parseInt(values[6]);
 
-        //danh sách các điểm bắt đầu của các vùng quét
-        //đối với giấy 20 câu có 2 khu vực quét (khu vực câu 1-10 và khu vực câu 11-20)
-        //=> khởi tạo 2 tọa độ bắt đầu của khu vực quét
-        template.SAX = new double[2];
-        template.SAY = new double[2];
-        template.SAX[0] = 1699 / tw;        //kích thước theo % của chiều rộng thử nghiệm
-        template.SAY[0] = 1231 / th;        //kích thước theo % của chiều cao thử nghiệm
-        template.SAX[1] = 1699 / tw;        //kích thước theo % của chiều rộng thử nghiệm
-        template.SAY[1] = 775 / th;        //kích thước theo % của chiều cao thử nghiệm
-
-        //tọa độ bắt đầu quét mã đề
-        template.mdX = 747.0 / tw;
-        template.mdY = 628.0 / th;
-
-        //tọa độ bắt đầu quét số báo danh
-        template.sbdX = 747.0 / tw;
-        template.sbdY = 937.0 / th;
-
-        Log.e(template.TAG, "SPX,SPY: (" + template.SAX[0] + "x" + template.SAY[0] + ")");//log start point (%)
-        //tính toán khoảng cách câu theo % kích thước (rộng, cao thử nghiệm)
-        template.kcX = (Math.abs(tspX - tlpX) / 9.0) / tw;
-        template.kcY = 74.0 / th;
-        Log.e(template.TAG, "KCC,KCD: (" + template.kcX + "x" + template.kcY + ")");//log khoảng cách câu (%)
-        template.cellSize = 50 / tw;
-        Log.e(template.TAG, "Cellsize: (" + template.cellSize + ")");//log kích thước cell (%)
-        return template;
-    }
-
-    public static Template createTemplate40() {
-        double tw, th;
-        //tọa độ câu 1A
-        double tspX, tspY;
-        //tọa độ câu 10A
-        double tlpX, tlpY;
-        Template template = new Template();
-        //Tính toán tọa độ
-        tw = 2706.0;
-        th = 1832.0;
-        Log.e(template.TAG, "TW x TH:" + tw + "x" + th);
-        tspX = 1912.0;
-        tspY = 1296.0;
-        tlpX = 2687.0;
-        tlpY = 1074.0;
-        template.SAX = new double[2];
-        template.SAY = new double[2];
-        template.SAX[0] = 1699 / tw;
-        template.SAY[0] = 1231 / th;
-        template.SAX[1] = 1699 / tw;
-        template.SAY[1] = 775 / th;
-
-        template.mdX = 747.0 / tw;
-        template.mdY = 628.0 / th;
-
-        template.sbdX = 747.0 / tw;
-        template.sbdY = 937.0 / th;
-
-        Log.e(template.TAG, "SPX,SPY: (" + template.SAX[0] + "x" + template.SAY[0] + ")");
-        template.kcX = (Math.abs(tspX - tlpX) / 9.0) / tw;
-        template.kcY = 74.0 / th;
-        Log.e(template.TAG, "KCC,KCD: (" + template.kcX + "x" + template.kcY + ")");
-        template.cellSize = 50 / tw;
-        Log.e(template.TAG, "Cellsize: (" + template.cellSize + ")");
-
-        return template;
-    }
-
-    public static Template createTemplate60() {
-        double tw, th;
-        //tọa độ câu 1A
-        double tspX, tspY;
-        //tọa độ câu 10A
-        double tlpX, tlpY;
-        Template template = new Template();
-        //Tính toán tọa độ
-        tw = 2706.0;
-        th = 1832.0;
-        Log.e(template.TAG, "TW x TH:" + tw + "x" + th);
-        tspX = 1912.0;
-        tspY = 1296.0;
-        tlpX = 2687.0;
-        tlpY = 1074.0;
-        template.SAX = new double[2];
-        template.SAY = new double[2];
-        template.SAX[0] = 1699 / tw;
-        template.SAY[0] = 1231 / th;
-        template.SAX[1] = 1699 / tw;
-        template.SAY[1] = 775 / th;
-
-        template.mdX = 747.0 / tw;
-        template.mdY = 628.0 / th;
-
-        template.sbdX = 747.0 / tw;
-        template.sbdY = 937.0 / th;
-
-        Log.e(template.TAG, "SPX,SPY: (" + template.SAX[0] + "x" + template.SAY[0] + ")");
-        template.kcX = (Math.abs(tspX - tlpX) / 9.0) / tw;
-        template.kcY = 74.0 / th;
-        Log.e(template.TAG, "KCC,KCD: (" + template.kcX + "x" + template.kcY + ")");
-        template.cellSize = 50 / tw;
-        Log.e(template.TAG, "Cellsize: (" + template.cellSize + ")");
-
-        return template;
-    }
-
-    public static Template createTemplate80() {
-        double tw, th;
-        //tọa độ câu 1A
-        double tspX, tspY;
-        //tọa độ câu 10A
-        double tlpX, tlpY;
-        Template template = new Template();
-        //Tính toán tọa độ
-        tw = 2706.0;
-        th = 1832.0;
-        Log.e(template.TAG, "TW x TH:" + tw + "x" + th);
-        tspX = 1912.0;
-        tspY = 1296.0;
-        tlpX = 2687.0;
-        tlpY = 1074.0;
-        template.SAX = new double[2];
-        template.SAY = new double[2];
-        template.SAX[0] = 1699 / tw;
-        template.SAY[0] = 1231 / th;
-        template.SAX[1] = 1699 / tw;
-        template.SAY[1] = 775 / th;
-
-        template.mdX = 747.0 / tw;
-        template.mdY = 628.0 / th;
-
-        template.sbdX = 747.0 / tw;
-        template.sbdY = 937.0 / th;
-
-        Log.e(template.TAG, "SPX,SPY: (" + template.SAX[0] + "x" + template.SAY[0] + ")");
-        template.kcX = (Math.abs(tspX - tlpX) / 9.0) / tw;
-        template.kcY = 74.0 / th;
-        Log.e(template.TAG, "KCC,KCD: (" + template.kcX + "x" + template.kcY + ")");
-        template.cellSize = 50 / tw;
-        Log.e(template.TAG, "Cellsize: (" + template.cellSize + ")");
-
-        return template;
-    }
-
-    public static Template createTemplate100() {
-        double tw, th;
-        //tọa độ câu 1A
-        double tspX, tspY;
-        //tọa độ câu 10A
-        double tlpX, tlpY;
-        Template template = new Template();
-        //Tính toán tọa độ
-        tw = 2706.0;
-        th = 1832.0;
-        Log.e(template.TAG, "TW x TH:" + tw + "x" + th);
-        tspX = 1912.0;
-        tspY = 1296.0;
-        tlpX = 2687.0;
-        tlpY = 1074.0;
-        template.SAX = new double[2];
-        template.SAY = new double[2];
-        template.SAX[0] = 1699 / tw;
-        template.SAY[0] = 1231 / th;
-        template.SAX[1] = 1699 / tw;
-        template.SAY[1] = 775 / th;
-
-        template.mdX = 747.0 / tw;
-        template.mdY = 628.0 / th;
-
-        template.sbdX = 747.0 / tw;
-        template.sbdY = 937.0 / th;
-
-        Log.e(template.TAG, "SPX,SPY: (" + template.SAX[0] + "x" + template.SAY[0] + ")");
-        template.kcX = (Math.abs(tspX - tlpX) / 9.0) / tw;
-        template.kcY = 74.0 / th;
-        Log.e(template.TAG, "KCC,KCD: (" + template.kcX + "x" + template.kcY + ")");
-        template.cellSize = 50 / tw;
-        Log.e(template.TAG, "Cellsize: (" + template.cellSize + ")");
-
-        return template;
-    }
-
-    private Template() {
-    }
-
-    public ArrayList<String> scanBaiLam(double w, double h, Point p0, Mat mRga1) {
-        ArrayList<String> baiLam = new ArrayList<>();
-        for (int i = 0; i < SAX.length; i++) {
-            String[] ctl = getCauTraLoiArea(i, w, h, p0, mRga1);
-            for (int j = 0; j < ctl.length; j++) {
-                baiLam.add(ctl[j]);
-            }
+            SectionArea sectionArea = new SectionArea();
+            sectionArea.xMin = x;
+            sectionArea.yMin = y;
+            sectionArea.xMax = x1;
+            sectionArea.yMax = y1;
+            sectionArea.numCol = w;
+            sectionArea.numRow = h;
+            sectionArea.type = type;
+            template.sectionAreas.add(sectionArea);
         }
-        return baiLam;
-    }
-
-    //lấy ds câu trả lời theo khu vực (khu vực câu 1-10, 11-20)
-    public String[] getCauTraLoiArea(int area, double w, double h, Point p0, Mat mRga1) {
-        //tạo mảng 10 câu
-        String[] cauTraLoi = new String[10];
-        String[] da = {A, B, C, D};
-        for (int j = 0; j < 10; j++) {
-            boolean[] ans = new boolean[4];
-            for (int l = 0; l < 4; l++) {
-                //tạo khung hình vuông
-                Square square = new Square(new Point(SAX[area] * w + j * (kcX * w) + p0.x, SAY[area] * h - l * (kcY * h) + p0.y), (int) (cellSize * w));
-                square.getPointCenter();
-                //lấy ra màu trung bình
-                double[] color = square.getColor(mRga1);
-                if (color[0] < DARK_COLOR) {//nếu ô quét màu tối
-                    //check đáp án
-                    ans[l] = true;
-                    //vẽ khung đỏ
-                    square.drawCheckTo(mRga1);
-                } else square.drawTo(mRga1); //vẽ khung xanh
-            }
-            //
-            cauTraLoi[j] = getDaTL(da, ans);
-        }
-        return cauTraLoi;
-    }
-
-    public String getDaTL(String[] da, boolean[] ans) {
-        String cauTraLoi = NOT;
-        int maxSelected = 0;
-        for (int i = 0; i < ans.length; i++) {
-            if (ans[i]) {
-                cauTraLoi = da[i];
-                maxSelected++;
-            }
-        }
-        if (maxSelected == 1) return cauTraLoi;
-        return NOT;
-    }
-
-    public String scanMaDe(double w, double h, Point p0, Mat mRga1) {
-        String[] maDe = new String[3];
-        for (int i = 0; i < maDe.length; i++) {
-            for (int j = 0; j < 10; j++) {
-                Square square = new Square(
-                        new Point(mdX * w + j * (kcX * w) + p0.x,
-                                mdY * h + i * (kcY * h) + p0.y),
-                        (int) (cellSize * w));
-                double[] color = square.getColor(mRga1);
-                if (color[0] < DARK_COLOR) {
-                    square.drawCheckTo(mRga1);
-                    maDe[i] = j + "";
-                } else square.drawTo(mRga1);
-            }
-        }
-        String md = maDe[2] + maDe[1] + maDe[0];
-        return md;
-    }
-
-    public String scanSBD(double w, double h, Point p0, Mat mRga1) {
-        String[] sbd = new String[6];
-        for (int i = 0; i < sbd.length; i++) {
-            for (int j = 0; j < 10; j++) {
-                Square square = new Square(
-                        new Point(sbdX * w + j * (kcX * w) + p0.x,
-                                sbdY * h + i * (kcY * h) + p0.y),
-                        (int) (cellSize * w));
-                double[] color = square.getColor(mRga1);
-                if (color[0] < DARK_COLOR) {
-                    square.drawCheckTo(mRga1);
-                    sbd[i] = j + "";
-                } else square.drawTo(mRga1);
-            }
-        }
-        String SBD = sbd[5] + sbd[4] + sbd[3] + sbd[2] + sbd[1] + sbd[0];
-        return SBD;
-    }
-
-    public void scan(double w, double h, Point p0, Mat mRga1) {
-        scanBaiLam(w, h, p0, mRga1);
-        scanMaDe(w, h, p0, mRga1);
-        scanSBD(w, h, p0, mRga1);
+        template.fixedBottomLeft = 1;
+        template.fixedRight = 18;
+        template.fixedTop = 40;
+        return template;
     }
 }
+//
+//        // Tính toán mức độ sáng  trung bình của vùng nằm trong 4 điểm góc
+//        double meanIntensity = 120;
+//        {
+//            double xMin = Math.min(tl.x, bl.x);
+//            double xMax = Math.max(tr.x, br.x);
+//            double yMin = Math.min(tl.y, tr.y);
+//            double yMax = Math.max(bl.y, br.y);
+//            Rect interest = new Rect(new Point(xMin, yMin), new Point(xMax, yMax));
+//            Mat roi = new Mat(grayImage, interest);
+//            Scalar mean = Core.mean(roi);
+//            meanIntensity = mean.val[0];
+//            Log.d("MyLog", "Mean intensity: " + meanIntensity);
+//
+//        }
+
