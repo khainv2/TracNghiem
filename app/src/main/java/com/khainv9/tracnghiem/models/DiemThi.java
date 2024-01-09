@@ -39,13 +39,29 @@ public class  DiemThi {
         if (baiThi == null || deThi == null)
             return 0;
         String[] dapAn = deThi.dapAn;
+        int s1 = deThi.soCauPhan1;
+        int s2 = deThi.soCauPhan2;
+        int s3 = deThi.soCauPhan3;
+
         String p1 = baiLam[0];
         String p2 = baiLam[1];
         String p3 = baiLam[2];
 
+        double diem = 0;
+        for (int i = 0; i < s1 && i < p1.length(); i++){
+            String expected = p1.charAt(i) + "";
+            int index = i;
+            String actual = dapAn[i];
+            if (expected.equals(actual)){
+                diem += 0.25;
+            }
+        }
+
         String dapAnAll = "";
         for (int i = 0; i < dapAn.length; i++) dapAnAll += dapAn[i];
-        Log.d("MyLog", "Start cham bai, bai lam: " + p1 + p2 + p3 + ", dap an" + dapAnAll);
+        Log.d("MyLog", "Start cham bai, bai lam: " + p1 + p2 + p3 + ", dap an" + dapAnAll +" , diem so hien tai: " + diem);
+
+//        Log.d("MyLog", "Diem so: " + diem);
 //
 //        double diem = 0;
 //        for (int i = 0; i < dapAn.length; i++) {

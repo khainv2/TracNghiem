@@ -592,7 +592,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
                     Imgproc.threshold(roi, roi, 100, 255, Imgproc.THRESH_BINARY);
                     Scalar mean = Core.mean(roi);
                     double meanValue = mean.val[0];
-                    if (meanValue < 233){
+                    if (meanValue < 240){
                         Point center = new Point((ref1.x + ref3.x) / 2, (ref1.y + ref3.y) / 2);
                         Imgproc.circle(inputFrame, center,10, new Scalar(0, 0, 255), 2);
                         PointMark mark = new PointMark();
@@ -675,6 +675,10 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
             examPaper.sections.add(section);
         }
+//
+//        if (true){
+//            return grayImage;
+//        }
 
         // Lấy tham số exam code
         Section examCodeSection = examPaper.sections.get(0);
@@ -706,7 +710,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
             Section section = examPaper.sections.get(i);
             for (int j = 0; j < 10; j++){
                 if (section.values.get(j) >= 0 && section.values.get(j) < 4){
-                    examPaper.chapter1Answer += ("ABCD".charAt(section.values.get(j)));
+                    examPaper.chapter1Answer += ("DCBA".charAt(section.values.get(j)));
                 } else {
                     examPaper.chapter1Answer += ('_');
                 }
@@ -716,7 +720,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
             Section section = examPaper.sections.get(i);
             for (int j = 0; j < 4; j++){
                 if (section.values.get(j) >= 0 && section.values.get(j) < 2){
-                    examPaper.chapter2Answer += ("TF".charAt(section.values.get(j)));
+                    examPaper.chapter2Answer += ("ĐS".charAt(section.values.get(j)));
                 } else {
                     examPaper.chapter2Answer += ('_');
                 }
