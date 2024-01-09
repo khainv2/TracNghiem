@@ -1,6 +1,7 @@
 package com.khainv9.tracnghiem.models;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.khainv9.tracnghiem.app.Utils;
 
@@ -35,11 +36,30 @@ public class  DiemThi {
     public double chamBai() {
         BaiThi baiThi = Utils.getBaiThi(maBaiThi);
         DeThi deThi = Utils.getDethi(baiThi, maDeThi);
-        int soCauDung = 0;
+        if (baiThi == null || deThi == null)
+            return 0;
         String[] dapAn = deThi.dapAn;
+        String p1 = baiLam[0];
+        String p2 = baiLam[1];
+        String p3 = baiLam[2];
 
-        for (int i = 0; i < dapAn.length; i++) if (baiLam[i].equals(dapAn[i])) soCauDung++;
-        diemSo = ((double) soCauDung / (double) dapAn.length) * baiThi.heDiem;
+        String dapAnAll = "";
+        for (int i = 0; i < dapAn.length; i++) dapAnAll += dapAn[i];
+        Log.d("MyLog", "Start cham bai, bai lam: " + p1 + p2 + p3 + ", dap an" + dapAnAll);
+//
+//        double diem = 0;
+//        for (int i = 0; i < dapAn.length; i++) {
+//            if (baiLam[i].equals(dapAn[i])) {
+//                diem += baiThi.heDiem;
+//            }
+//        }
+//
+        int soCauDung = 0;
+
+//        String[] dapAn = deThi.dapAn;
+//
+//        for (int i = 0; i < dapAn.length; i++) if (baiLam[i].equals(dapAn[i])) soCauDung++;
+//        diemSo = ((double) soCauDung / (double) dapAn.length) * baiThi.heDiem;
         return diemSo;
     }
 

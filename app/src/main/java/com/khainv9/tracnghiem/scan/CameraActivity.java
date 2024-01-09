@@ -3,6 +3,7 @@ package com.khainv9.tracnghiem.scan;
 import static org.opencv.core.CvType.CV_8UC3;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -10,18 +11,24 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.app.Utils;
 import com.khainv9.tracnghiem.models.BaiThi;
+import com.khainv9.tracnghiem.models.DeThi;
+import com.khainv9.tracnghiem.models.DiemThi;
+import com.khainv9.tracnghiem.models.HocSinh;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
+import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -34,9 +41,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CameraActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
     private static final String TAG = "CameraActivity";
@@ -46,6 +51,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
     private TextView textViewInfo;
     private MenuItem mItemSwitchCamera = null;
 
+    ExamPaper examPaper = new ExamPaper();
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -76,7 +82,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.tutorial1_surface_view);
+        setContentView(R.layout.activity_camera);
 
         //
         mOpenCvCameraView = findViewById(R.id.activity_camera);
@@ -90,10 +96,23 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
         textViewInfo = findViewById(R.id.textViewInfo);
 
+//        Button btCapture = findViewById(R.id.btCapture);
+//        btCapture.setOnClickListener(v -> {
+//
+//            DiemThi diemThi = new DiemThi(examPaper.studentId,
+//                    baiThi.maBaiThi,
+//                    examPaper.examCode,
+//                    examPaper);
+//            Utils.update(diemThi);
+//        });
+
         //lấy vị trí của bài thi trong intent gửi đến
         int i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
+        if (i >= 0 && i < Utils.dsBaiThi.size()){
+            baiThi = Utils.dsBaiThi.get(i);
+        }
 //        baiThi = Utils.dsBaiThi.get(i);
-//        Toast.makeText(this, "Chạm để bắt đầu chấm bài", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Chạm để bắt đầu chấm bài", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -309,6 +328,8 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
     }
 
     private Mat processFrame(Mat inputFrame) {
+        examPaper = new ExamPaper();
+
         // Create timer to measure processing time
         long startTime = System.currentTimeMillis();
 
@@ -547,7 +568,6 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
         calculateVHLines(tl, tr, br, bl);
 
-        ExamPaper examPaper = new ExamPaper();
         for (int sectionIndex = 0; sectionIndex < template.sectionAreas.size(); sectionIndex++){
 
             SectionArea sectionArea = template.sectionAreas.get(sectionIndex);
@@ -713,11 +733,51 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
             }
         }
 
+        // Tìm kiếm học sinh có sbd bằng studentId
+        HocSinh hsFound = null;
+        String hsName = "";
+        for (HocSinh hocSinh: Utils.dsHocSinh){
+            if (hocSinh.sbd.equals(studentId)){
+                hsFound = hocSinh;
+                hsName = " [ " + hocSinh.name + " ]";
+                break;
+            }
+        }
+
+        // Tìm kiếm bài thi có mã đề bằng examCode
+        DeThi deThiFound = null;
+        String txtDeThi = "";
+        if (baiThi != null){
+            for (DeThi dethi: baiThi.dsDeThi){
+                if (dethi.maDeThi.equals(examCode)){
+                    deThiFound = dethi;
+                    break;
+                }
+            }
+        }
+        if (deThiFound != null){
+            txtDeThi = examCode + " OK!";
+        } else {
+            txtDeThi = examCode + " Not found!";
+        }
+
         Log.d("MyLog", "Exam paper info: " + examPaper.toString());
-        final String textResult = "Mã đề: " + examCode + "\n SBD: " + studentId;
-        runOnUiThread(() -> textViewInfo.setText("Mã đề thi: " + textResult));
+        final String textResult = "Mã đề: " + txtDeThi + "\n SBD: " + studentId + hsName;
+        runOnUiThread(() -> textViewInfo.setText(textResult));
 
         Imgproc.putText(inputFrame, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+
+        if (touch){
+            touch = false;
+            DiemThi diemThi = new DiemThi(examPaper.studentId,
+                    baiThi.maBaiThi,
+                    examPaper.examCode,
+                    matToBitmap(inputFrame),
+                    new String[] { examPaper.chapter1Answer, examPaper.chapter2Answer, examPaper.chapter3Answer });
+            Utils.update(diemThi);
+            runOnUiThread(() -> Toast.makeText(CameraActivity.this, "Đã lưu điểm thi", Toast.LENGTH_SHORT).show());
+            Log.d("MyLog", "Diem thi: " + diemThi.toString());
+        }
 
         return inputFrame;
     }
@@ -734,5 +794,19 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
     public boolean onTouch(View v, MotionEvent event) {
         touch = true;
         return false;
+    }
+
+    public Bitmap matToBitmap(Mat mat) {
+        Bitmap bmp = null;
+        Mat tmp = mat.clone();
+        try {
+            bmp = Bitmap.createBitmap(tmp.cols(), tmp.rows(), Bitmap.Config.ARGB_8888);
+            org.opencv.android.Utils.matToBitmap(tmp, bmp);
+        } catch (CvException e) {
+            Log.d("Exception", e.getMessage());
+        }
+        org.opencv.android.Utils.matToBitmap(mat, bmp);
+
+        return bmp;
     }
 }

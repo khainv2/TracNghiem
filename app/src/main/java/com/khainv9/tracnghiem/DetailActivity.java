@@ -2,16 +2,14 @@ package com.khainv9.tracnghiem;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
-import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.app.Utils;
 
@@ -42,7 +40,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         LayoutInflater inflater = LayoutInflater.from(this);
 
         content.addView(new FuncView(inflater)
-                .setText("Đáp án")
+                .setText("Danh sách đề thi")
                 .setIconRes(R.drawable.ic_vpn_key_black_24dp)
                 .setOnClickListenter(this, F_DAP_AN)
                 .getView());

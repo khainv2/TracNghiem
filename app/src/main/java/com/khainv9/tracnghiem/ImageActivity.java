@@ -5,14 +5,12 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-
-import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.app.Utils;
 import com.khainv9.tracnghiem.models.DiemThi;

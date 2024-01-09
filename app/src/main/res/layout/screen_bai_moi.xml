@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="8dp"
-            android:minWidth="70dp"
+            android:minWidth="120dp"
             android:text="TÊN BÀI"
             android:textColor="#000000"
             android:textSize="14dp" />
@@ -33,29 +33,30 @@
 
     </RelativeLayout>
 
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/tv_so_cau"
+            android:id="@+id/tv_p1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="8dp"
-            android:minWidth="70dp"
-            android:text="SỐ CÂU"
+            android:minWidth="120dp"
+            android:text="SỐ CÂU PHẦN 1"
             android:textColor="#000000"
             android:textSize="14dp" />
 
         <EditText
             android:inputType="number"
-            android:id="@+id/ed_so_cau"
+            android:id="@+id/ed_p1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/tv_so_cau"
-            android:text="20"
+            android:layout_toRightOf="@+id/tv_p1"
+            android:text="18"
             android:textColor="#000000"
             android:textSize="14dp" />
 
@@ -66,23 +67,80 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/tv_he_diem"
+            android:id="@+id/tv_p2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="8dp"
-            android:minWidth="70dp"
-            android:text="HỆ ĐIỂM"
+            android:minWidth="120dp"
+            android:text="SỐ CÂU PHẦN 2"
             android:textColor="#000000"
             android:textSize="14dp" />
 
         <EditText
             android:inputType="number"
-            android:id="@+id/ed_he_diem"
+            android:id="@+id/ed_p2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/tv_he_diem"
+            android:layout_toRightOf="@+id/tv_p2"
+            android:text="4"
+            android:textColor="#000000"
+            android:textSize="14dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_p3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            android:minWidth="120dp"
+            android:text="SỐ CÂU PHẦN 3"
+            android:textColor="#000000"
+            android:textSize="14dp" />
+
+        <EditText
+            android:inputType="number"
+            android:id="@+id/ed_p3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/tv_p3"
+            android:text="6"
+            android:textColor="#000000"
+            android:textSize="14dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            android:minWidth="120dp"
+            android:text="TỔNG SỐ ĐIỂM"
+            android:textColor="#000000"
+            android:textSize="14dp" />
+
+        <EditText
+            android:inputType="number"
+            android:enabled="false"
+            android:id="@+id/ed_number_total"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/tv_total"
             android:text="10"
             android:textColor="#000000"
             android:textSize="14dp" />

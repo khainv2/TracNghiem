@@ -1,7 +1,8 @@
 package com.khainv9.tracnghiem.adapter;
 
+import android.app.AlertDialog;
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,21 @@ public class DeThiAdapter extends RecyclerView.Adapter<DeThiAdapter.BTVH> implem
         holder.ma.setText("" + deThi.maDeThi);
         holder.item.setId(position);
         holder.item.setOnClickListener(this);
+        holder.item.setOnLongClickListener(v -> {
+            // Tạo alert dialog confirm
+            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+            builder.setTitle("Xóa đề thi");
+            builder.setMessage("Bạn có chắc chắn muốn xóa đề thi này?");
+            builder.setPositiveButton("Xóa", (dialog, which) -> {
+                baiThi.dsDeThi.remove(position);
+                Utils.update(baiThi);
+                notifyDataSetChanged();
+            });
+            builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+            AlertDialog dialog = builder.create();
+            dialog.show();
+            return true;
+        });
     }
 
     @Override

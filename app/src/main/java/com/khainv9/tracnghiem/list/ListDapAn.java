@@ -2,20 +2,23 @@ package com.khainv9.tracnghiem.list;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.khainv9.tracnghiem.R;
+
+import java.util.List;
 
 
 public class ListDapAn extends ListMini {
-
+    List<String[]> listDapAn;
     String[] dapAn;
-    DapAn1[] dapAn1s;
+    ItemRowDapAn[] itemRows;
 
-    public ListDapAn(ViewGroup vg, String[] dapAn) {
+    public ListDapAn(ViewGroup vg, String[] dapAn, List<String[]> listDapAn) {
         super(vg);
         this.dapAn = dapAn;
-        dapAn1s = new DapAn1[dapAn.length];
+        this.listDapAn = listDapAn;
+        itemRows = new ItemRowDapAn[dapAn.length];
     }
 
     @Override
@@ -30,14 +33,15 @@ public class ListDapAn extends ListMini {
 
     @Override
     public void update(int i) {
-        LinearLayout ll = (LinearLayout) getMiniVH(i).item;
-        dapAn1s[i] = new DapAn1(ll, dapAn[i]);
-        dapAn1s[i].create();
+        FlexboxLayout ll = (FlexboxLayout) getMiniVH(i).item;
+        itemRows[i] = new ItemRowDapAn(ll, dapAn[i], listDapAn.get(i));
+        itemRows[i].create();
     }
 
     public String[] getListDapAn() {
-        String[] all = new String[dapAn1s.length];
-        for (int i = 0; i < dapAn1s.length; i++) all[i] = dapAn1s[i].getDapAn();
+        String[] all = new String[itemRows.length];
+        for (int i = 0; i < itemRows.length; i++) all[i] = itemRows[i].getDapAn();
         return all;
     }
+
 }

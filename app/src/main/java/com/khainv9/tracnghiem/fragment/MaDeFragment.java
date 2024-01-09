@@ -1,7 +1,7 @@
 package com.khainv9.tracnghiem.fragment;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +11,9 @@ import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.list.ListNumber;
 import com.khainv9.tracnghiem.list.ListSelectNumber;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MaDeFragment extends Fragment {
@@ -48,11 +51,13 @@ public class MaDeFragment extends Fragment {
             } catch (Exception e) {
             }
         }
-        int number = 10;
-        new ListNumber((ViewGroup) v.findViewById(R.id.ll1), number).create();
+
+        List<String> numbers = new ArrayList<>();
+        for (int i = 0; i < 10; i++) numbers.add(i + "");
+        new ListNumber((ViewGroup) v.findViewById(R.id.ll1), numbers).create();
         lsNumbrer = new ListSelectNumber[3];
         for (int i = 0; i < lsNumbrer.length; i++) {
-            lsNumbrer[i] = new ListSelectNumber(lls[i], number, selected[i]);
+            lsNumbrer[i] = new ListSelectNumber(lls[i], numbers.size(), selected[i]);
             lsNumbrer[i].create();
         }
         return v;

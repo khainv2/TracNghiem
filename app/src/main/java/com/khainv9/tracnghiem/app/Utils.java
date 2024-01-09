@@ -23,7 +23,7 @@ import java.util.Date;
 public class Utils {
 
     public static String ARG_P_BAI_THI = "P_BAI_THI", ARG_P_DE_THI = "P_DE_THI";
-    private static final String dbName = "test.sqlite";
+    private static final String dbName = "test2.sqlite";
     private static final String BAI_THI = "BaiThi", HOC_SINH = "HocSinh", DIEM_THI = "DiemThi", HINH_ANH = "HinhAnh";
 
     public static ArrayList<BaiThi> dsBaiThi;
@@ -34,6 +34,7 @@ public class Utils {
 
     public static void init(Context context) {
         storeManager = StoreManager.open(context, dbName, new String[]{BAI_THI, HOC_SINH, DIEM_THI, HINH_ANH});
+
         dsBaiThi = loadBaiThi();
         dsHocSinh = loadHocSinh();
         dsDiemThi = loadDiemThi();
@@ -92,14 +93,14 @@ public class Utils {
         try {
             byte[] b = msgpack.write(diemThi);
             storeManager.overide(DIEM_THI, String.valueOf(diemThi.id), 0, b);
-//            DiemThi restore = msgpack.read(b, DiemThi.class);
-//            Log.e("update: DiemThi", restore.toString());
+            DiemThi restore = msgpack.read(b, DiemThi.class);
+            Log.d("update: DiemThi", restore.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        storeManager.overide(DIEM_THI, diemThi.id + "", 0, diemThi);
-//        DiemThi restore = storeManager.load(DIEM_THI, String.valueOf(diemThi.id), DiemThi.class);
-//        Log.e("update: DiemThi", restore.toString());
+        storeManager.overide(DIEM_THI, diemThi.id + "", 0, diemThi);
+        DiemThi restore = storeManager.load(DIEM_THI, String.valueOf(diemThi.id), DiemThi.class);
+        Log.e("update: DiemThi", restore.toString());
     }
 
     public static void update(HocSinh hs) {

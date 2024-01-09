@@ -1,16 +1,14 @@
 package com.khainv9.tracnghiem;
 
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
-import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.app.Utils;
 import com.khainv9.tracnghiem.fragment.DapAnFragment;
@@ -19,6 +17,14 @@ import com.khainv9.tracnghiem.fragment.SSPAdapter;
 import com.khainv9.tracnghiem.models.BaiThi;
 import com.khainv9.tracnghiem.models.DeThi;
 
+/*
+    TODO:
+    Khi edit học sinh, cần notify lại thông tin số báo danh
+    Đổi tên tab Đáp án thành Đề thi
+//    Bỏ ô vuông đầu trong
+
+
+ */
 
 public class MaDeActivity extends AppCompatActivity implements View.OnClickListener, TabLayout.OnTabSelectedListener {
 
@@ -41,7 +47,7 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_ma_de);
         toolbar = (Toolbar) findViewById(R.id.ct_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); //cài đặt nút back home
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Mã đề");
 
         //lấy vị trí của bài thi trong intent gửi đến
@@ -54,14 +60,16 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
         }
         deThi = baiThi.dsDeThi.get(iDT);
 
-
         viewPager = findViewById(R.id.vp);
         tabLayout = (TabLayout) findViewById(R.id.tab);
         tabLayout.addTab(tabLayout.newTab().setText("MÃ ĐỀ"));
         tabLayout.addTab(tabLayout.newTab().setText("ĐÁP ÁN"));
 
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-        Fragment[] fragments = new Fragment[]{sMaDe = MaDeFragment.create(deThi.maDeThi), sDapAn = DapAnFragment.create(deThi.dapAn)};
+        Fragment[] fragments = new Fragment[]{
+                sMaDe = MaDeFragment.create(deThi.maDeThi),
+                sDapAn = DapAnFragment.create(deThi.dapAn, deThi.soCauPhan1, deThi.soCauPhan2, deThi.soCauPhan3 )
+        };
 
         SSPAdapter adapter = new SSPAdapter(getSupportFragmentManager(), fragments);
         viewPager.setAdapter(adapter);
@@ -93,6 +101,7 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
         super.onBackPressed();
         deThi.maDeThi = sMaDe.getMaDe();
         deThi.dapAn = sDapAn.getListDapAn();
+
         Utils.update(baiThi);
     }
 
@@ -103,11 +112,9 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onTabUnselected(TabLayout.Tab tab) {
-
     }
 
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
-
     }
 }

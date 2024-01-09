@@ -1,7 +1,7 @@
 package com.khainv9.tracnghiem.adapter;
 
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +35,7 @@ public class BaiThiAdapter extends RecyclerView.Adapter<BaiThiAdapter.BTVH> impl
         BaiThi baiThi = dsBaiThi.get(position);
         holder.ten.setText(baiThi.tenBaiThi);
         holder.ngay.setText(Utils.dateString(baiThi.ngayTao));
-        holder.soCau.setText(baiThi.soCau + " câu");
+        holder.soCau.setText("Số câu: " + baiThi.soCauPhan1 + "/" + baiThi.soCauPhan2 + "/" + baiThi.soCauPhan3);
         holder.item.setId(position);
         holder.item.setOnClickListener(this);
         if (onL != null) holder.item.setOnLongClickListener(onL);

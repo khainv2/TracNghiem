@@ -1,7 +1,7 @@
 package com.khainv9.tracnghiem.adapter;
 
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +40,7 @@ public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
         BaiThi baiThi = Utils.getBaiThi(d.maBaiThi);
         holder.tenBaiThi.setText(baiThi.tenBaiThi);
         holder.maDe.setText(d.maDeThi);
-        holder.soDiem.setText(String.format("%.2f điểm", d.diemSo, baiThi.heDiem));
+        holder.soDiem.setText(String.format("%.2f điểm", d.diemSo, 93));
 
         holder.item.setId(position);
         holder.item.setOnLongClickListener(this);

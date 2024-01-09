@@ -8,33 +8,31 @@ import java.util.Random;
 @Message
 public class DeThi {
 
-    public static final String A = "A", B = "B", C = "C", D = "D", E = "E", NOT = "";
+    public static final String A = "A", B = "B", C = "C", D = "D", E = "E", NOT = "_";
 
     public int id;
     public int maBaiThi;
     public String maDeThi;
+
+    public int soCauPhan1, soCauPhan2, soCauPhan3;
     public String[] dapAn;
 
     public DeThi() {
     }
 
-    public DeThi(int maBaiThi, int soCau) {
+    public DeThi(int maBaiThi, int soCauPhan1, int soCauPhan2, int soCauPhan3) {
         this.id = new Random().nextInt();
         this.maBaiThi = maBaiThi;
         this.maDeThi = "";
-        this.dapAn = new String[soCau];
+
+        this.soCauPhan1 = soCauPhan1;
+        this.soCauPhan2 = soCauPhan2;
+        this.soCauPhan3 = soCauPhan3;
+
+        this.dapAn = new String[soCauPhan1 + (soCauPhan2 * 4) + (soCauPhan3 * 4)];
+
         for (int i = 0; i < dapAn.length; i++) this.dapAn[i] = NOT;
     }
 
-    public DeThi(int id, int maBaiThi, String maDeThi, int soCau) {
-        this.id = id;
-        this.maBaiThi = maBaiThi;
-        this.maDeThi = maDeThi;
-        this.dapAn = new String[soCau];
-        for (int i = 0; i < dapAn.length; i++) this.dapAn[i] = NOT;
-    }
 
-    public int getSoCau() {
-        return dapAn.length;
-    }
 }
