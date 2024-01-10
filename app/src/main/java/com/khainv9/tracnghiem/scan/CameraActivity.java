@@ -4,44 +4,26 @@ import static org.opencv.core.CvType.CV_8UC3;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.app.Utils;
 import com.khainv9.tracnghiem.models.BaiThi;
-import com.khainv9.tracnghiem.models.DeThi;
-import com.khainv9.tracnghiem.models.DiemThi;
-import com.khainv9.tracnghiem.models.HocSinh;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
-import org.opencv.core.CvException;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public class CameraActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
     private static final String TAG = "CameraActivity";
@@ -59,6 +41,10 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
                 Log.i(TAG, "OpenCV loaded successfully");
                 mOpenCvCameraView.enableView();
                 mOpenCvCameraView.setOnTouchListener(CameraActivity.this);
+
+                // Load image from R.drawable.test to bitmap
+                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+                test = Scanner.bitmapToMat(bmp);
             } else {
                 super.onManagerConnected(status);
             }
@@ -84,15 +70,15 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
         mOpenCvCameraView.setCvCameraViewListener(this);
 
-        Bitmap bmp = Utils.loadImage("123");
-        test = Scanner.bitmapToMat(bmp);
 
         //lấy vị trí của bài thi trong intent gửi đến
         int i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
         if (i >= 0 && i < Utils.dsBaiThi.size()){
             baiThi = Utils.dsBaiThi.get(i);
-            scanner = new Scanner(baiThi);
+        } else {
+            baiThi = new BaiThi("abc", 17, 2, 2);
         }
+        scanner = new Scanner(baiThi);
 
         Toast.makeText(this, "Chạm để bắt đầu chấm bài", Toast.LENGTH_SHORT).show();
     }
@@ -133,8 +119,8 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        if (true)
-            return test;
+//        if (true)
+//            return test;
         if (scanner == null) {
             return inputFrame.rgba();
         } else {
@@ -152,5 +138,4 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
             scanner.touch = true;
         return false;
     }
-
 }

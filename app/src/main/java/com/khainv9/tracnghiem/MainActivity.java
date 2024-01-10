@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Chấm trắc nghiệm");
-        Utils.init(this);
 
         //init
         rv = findViewById(R.id.rv);

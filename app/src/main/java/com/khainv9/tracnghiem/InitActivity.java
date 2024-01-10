@@ -9,6 +9,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.scan.CameraActivity;
+
 public class InitActivity extends AppCompatActivity {
 
     final int CAMERA_PERMISSION = 0;
@@ -58,7 +61,9 @@ public class InitActivity extends AppCompatActivity {
     }
 
     private void startCamera() {
-        if (CAMERA_PERMISSION_GRANT)
-            startActivity(new Intent(this, MainActivity.class));
+        if (CAMERA_PERMISSION_GRANT) {
+            Utils.init(this);
+            startActivity(new Intent(this, CameraActivity.class));
+        }
     }
 }

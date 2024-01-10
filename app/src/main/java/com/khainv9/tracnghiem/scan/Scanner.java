@@ -74,9 +74,10 @@ public class Scanner {
     }
 
     void init(int width, int height){
+
         this.myWidth = width;
         this.myHeight = (this.myWidth * 9) / 16;
-        int heightCal = this.myHeight / 5;
+        int heightCal = this.myHeight / 4;
         int widthCal = (this.myHeight * 9) / 8;
         this.corners = new Mat[4];
         this.corners1 = new Mat[4];
@@ -101,6 +102,48 @@ public class Scanner {
         dst = new Mat();
     }
 
+    private static List<Point> verifyTopPoint(List<Point> points, int limit, int step, boolean isTop){
+        int s = points.size();
+        while (s > limit) s -= step;
+        s += step;
+
+        // Sắp xếp danh sách theo thứ tự giá trị y tăng dần
+        if (isTop){
+            Collections.sort(points, (o1, o2) -> Double.compare(o1.y, o2.y));
+        } else {
+            Collections.sort(points, (o1, o2) -> Double.compare(o2.y, o1.y));
+        }
+
+
+        for (int i = s; i <= points.size(); i+= step){
+            // Lấy danh sách s điểm trong danh sách
+            List<Point> subPoints = new ArrayList<>();
+            for (int j = 0; j < i; j++){
+                subPoints.add(points.get(j));
+            }
+            while (subPoints.size() > limit){
+                subPoints.remove(findOutlier(subPoints));
+            }
+
+            double[] lineParams = findSlopeAndIntercept(subPoints);
+            double avrDistance = 0;
+            for (Point point : subPoints) {
+                double distance = Math.abs(point.y - (lineParams[0] * point.x + lineParams[1]));
+                avrDistance += distance;
+            }
+            avrDistance /= subPoints.size();
+
+            Log.d("MyLog", "verify top with " + i + " points, avrDistance = " + avrDistance);
+
+            if (avrDistance < step){
+                return subPoints;
+            }
+        }
+
+
+        List<Point> output = new ArrayList<>();
+        return output;
+    }
 
 
     private static double[] findSlopeAndIntercept(List<Point> points){
@@ -162,6 +205,28 @@ public class Scanner {
         return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
 
+    private static void removeTooClose(List<Point> points, double minDistance, int numCloseAccept, int limit){
+        if (points.size() == limit)
+            return;
+
+        for (int i = points.size() - 1; i >= 0; i--){
+            int countTooClose = 0;
+            for (int j = i - 1; j >= 0; j--){
+                if (distance(points.get(i), points.get(j)) < minDistance){
+                    countTooClose++;
+                    points.remove(i);
+                    break;
+                }
+            }
+            if (countTooClose >= numCloseAccept){
+                points.remove(i);
+                if (points.size() == limit)
+                    return;
+            }
+        }
+
+    }
+
     private static boolean sortListPoints(List<Point> points, boolean isHorizontal) {
         if (points.size() < 2) {
             return false;
@@ -195,7 +260,7 @@ public class Scanner {
         r1.copyTo(inputRoi);
     }
 
-    class ProcessResult {
+    static class ProcessResult {
         Mat resultMat;
         String info = "";
     }
@@ -254,6 +319,9 @@ public class Scanner {
         Imgproc.rectangle(inputFrame, cornerTL, cornerBR, new Scalar(0, 0, 255), 4);
         Imgproc.line(inputFrame, new Point(cornerTL.x, rects[0].br().y), new Point(rects[1].tl().x, rects[0].br().y), new Scalar(0, 0, 255), 4);
         Imgproc.line(inputFrame, new Point(rects[1].tl().x, rects[0].br().y), new Point(rects[1].tl().x, cornerBR.y), new Scalar(0, 0, 255), 4);
+
+        Imgproc.line(inputFrame, new Point(cornerTL.x, rects[2].tl().y), new Point(rects[2].br().x, rects[2].tl().y), new Scalar(0, 0, 255), 4);
+        Imgproc.line(inputFrame, new Point(rects[2].br().x, cornerBR.y), new Point(rects[2].br().x, rects[2].tl().y), new Scalar(0, 0, 255), 4);
         Rect paperCorner = new Rect(cornerTL, cornerBR);
 
         // Use Canny edge detector to find edges in the image
@@ -354,21 +422,32 @@ public class Scanner {
         for (Point point : rightPoints){
             rightPointsClone.add(new Point(point.y, point.x));
         }
-        while (rightPointsClone.size() > template.fixedRight){
-            rightPointsClone.remove(findOutlier(rightPointsClone));
-        }
+        rightPointsClone = verifyTopPoint(rightPointsClone, template.fixedRight, 5, false);
+//        while (rightPointsClone.size() > template.fixedRight){
+//            rightPointsClone.remove(findOutlier(rightPointsClone));
+//        }
         rightPoints.clear();
         for (Point point : rightPointsClone){
             rightPoints.add(new Point(point.y, point.x));
         }
 
-        while (topPoints.size() > template.fixedTop) {
-            topPoints.remove(findOutlier(topPoints));
+        topPoints = verifyTopPoint(topPoints, template.fixedTop, 10, true);
+        if (topPoints.size() == 0 || rightPoints.size() == 0){
+            textDisplay += "Chua tim duoc diem tham chieu";
+            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            putBottomInfo(inputFrame, whiteSquare, cornerBR);
+
+            return result;
         }
 
         // Draw all top points
         for (Point point : topPoints){
             Imgproc.circle(inputFrame, point, 10, new Scalar(0, 255, 255), 2);
+        }
+
+        // Draw all right points
+        for (Point point : rightPoints){
+            Imgproc.circle(inputFrame, point, 10, new Scalar(255, 255, 0), 2);
         }
 
         // Loại bỏ điểm ngoại lai của bottom left points, chỉ giữ lại 1 điểm
@@ -380,7 +459,7 @@ public class Scanner {
         double angleTR = Math.atan2(tr.y - br.y, tr.x - br.x) - Math.atan2(tr.y - tl.y, tr.x - tl.x);
         double angleTRDegree = Math.abs(Math.toDegrees(angleTR));
         if (Math.abs(angleTRDegree - 90) > DeltaAngle){
-            textDisplay = "Goc chua dung, vui long can chinh lai camera";
+            textDisplay = "Goc chua dung, vui long can chinh lai camera (" + angleTRDegree + ")";
             Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             putBottomInfo(inputFrame, whiteSquare, cornerBR);
             return result;
@@ -415,6 +494,7 @@ public class Scanner {
                 || Math.abs(angleBRDegree - 90) > DeltaAngle){
             textDisplay = "Goc chua dung, vui long can chinh lai camera";
             Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "angleBL = " + String.format("%.2f", angleBLDegree) + String.format("%.2f", angleTLDegree) + String.format("%.2f", angleBRDegree) , new Point(40, 120), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             putBottomInfo(inputFrame, whiteSquare, cornerBR);
             return result;
         }
@@ -425,12 +505,12 @@ public class Scanner {
         double ratioCenterTop = (centerTop.x - tl.x) / (tr.x - tl.x);
         double ratioCenterRight = (centerRight.y - tr.y) / (br.y - tr.y);
 
-        if (ratioCenterTop < 0.48 || ratioCenterTop > 0.52 || ratioCenterRight < 0.53 || ratioCenterRight > 0.57){
-            textDisplay += "Cac diem tham chieu khong hop le";
-            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-            putBottomInfo(inputFrame, whiteSquare, cornerBR);
-            return result;
-        }
+//        if (ratioCenterTop < 0.48 || ratioCenterTop > 0.52 || ratioCenterRight < 0.53 || ratioCenterRight > 0.57){
+//            textDisplay += "Cac diem tham chieu khong hop le (ratio not valid)";
+//            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+//            putBottomInfo(inputFrame, whiteSquare, cornerBR);
+//            return result;
+//        }
 
         Point t1 = topPoints.get(topPoints.size() - 1);
         Point t2 = rightPoints.get(0);
@@ -438,7 +518,10 @@ public class Scanner {
         if (!isValidMatch){
             textDisplay += "Cac diem tham chieu khong hop le";
             Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "t1 = " + t1.x + ", " + t1.y, new Point(40, 120), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "t2 = " + t2.x + ", " + t2.y, new Point(40, 180), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             putBottomInfo(inputFrame, whiteSquare, cornerBR);
+//            while(true);
             return result;
         }
 
@@ -557,11 +640,11 @@ public class Scanner {
 
             examPaper.sections.add(section);
         }
-//
-        if (true){
-            result.resultMat = grayImage;
-            return result;
-        }
+////
+//        if (true){
+//            result.resultMat = grayImage;
+//            return result;
+//        }
 
         // Lấy tham số exam code
         Section examCodeSection = examPaper.sections.get(0);
@@ -653,20 +736,20 @@ public class Scanner {
         putBottomInfo(inputFrame, whiteSquare, cornerBR);
 
 
-
-        if (touch){
-            touch = false;
-            DiemThi diemThi = new DiemThi(examPaper.studentId,
-                    baiThi.maBaiThi,
-                    examPaper.examCode,
-                    matToBitmap(inputFrame),
-                    new String[] { examPaper.chapter1Answer, examPaper.chapter2Answer, examPaper.chapter3Answer });
-            Utils.update(diemThi);
-
-            result.info = "Đã lưu kết quả chấm";
-
-            Log.d("MyLog", "Diem thi: " + diemThi.toString());
-        }
+//
+//        if (touch){
+//            touch = false;
+//            DiemThi diemThi = new DiemThi(examPaper.studentId,
+//                    baiThi.maBaiThi,
+//                    examPaper.examCode,
+//                    matToBitmap(inputFrame),
+//                    new String[] { examPaper.chapter1Answer, examPaper.chapter2Answer, examPaper.chapter3Answer });
+//            Utils.update(diemThi);
+//
+//            result.info = "Đã lưu kết quả chấm";
+//
+//            Log.d("MyLog", "Diem thi: " + diemThi.toString());
+//        }
 
         return result;
     }
