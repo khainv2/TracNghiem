@@ -38,44 +38,65 @@ public class  DiemThi {
         DeThi deThi = Utils.getDethi(baiThi, maDeThi);
         if (baiThi == null || deThi == null)
             return 0;
-        String[] dapAn = deThi.dapAn;
-        int s1 = deThi.soCauPhan1;
-        int s2 = deThi.soCauPhan2;
-        int s3 = deThi.soCauPhan3;
+        String dapAnP1[] = deThi.getDapAnP1();
+        String dapAnP2[] = deThi.getDapAnP2();
+        String dapAnP3[] = deThi.getDapAnP3();
 
         String p1 = baiLam[0];
         String p2 = baiLam[1];
         String p3 = baiLam[2];
 
         double diem = 0;
-        for (int i = 0; i < s1 && i < p1.length(); i++){
-            String expected = p1.charAt(i) + "";
-            int index = i;
-            String actual = dapAn[i];
+        // Điểm thi phần 1, mỗi câu tính 0.25 điểm
+        for (int i = 0; i < dapAnP1.length && i < p1.length(); i++){
+            String actual = p1.charAt(i) + "";
+            String expected = dapAnP1[i];
             if (expected.equals(actual)){
                 diem += 0.25;
             }
         }
 
+        // Điểm thi phần 2, cứ 4 câu liên tiếp: 1 câu đúng được 0 điểm, 2 câu đúng được 0.25 điểm, 3 câu đúng được 0.5 điểm, 4 câu đúng được 1 điểm
+        int count = 0;
+        for (int i = 0; i < dapAnP2.length && i < p2.length(); i++){
+            String actual = p2.charAt(i) + "";
+            String expected = dapAnP2[i];
+            if (expected.equals(actual)){
+                count++;
+                if (i % 4 == 3){
+                    if (count == 2){
+                        diem += 0.25;
+                    } else if (count == 3){
+                        diem += 0.5;
+                    } else if (count == 4){
+                        diem += 1;
+                    }
+                    count = 0;
+                }
+            }
+        }
+
+        // Điểm thi phần 3: cứ 4 câu liên tiếp: cả 4 câu đúng thì được 0.25 điểm
+        count = 0;
+        for (int i = 0; i < dapAnP3.length && i < p3.length(); i++){
+            String actual = p3.charAt(i) + "";
+            String expected = dapAnP3[i];
+            if (expected.equals(actual)){
+                count++;
+                if (i % 4 == 3){
+                    if (count == 4){
+                        diem += 0.25;
+                    }
+                    count = 0;
+                }
+            }
+        }
+
         String dapAnAll = "";
-        for (int i = 0; i < dapAn.length; i++) dapAnAll += dapAn[i];
+        for (int i = 0; i < deThi.dapAn.length; i++) dapAnAll += deThi.dapAn[i];
         Log.d("MyLog", "Start cham bai, bai lam: " + p1 + p2 + p3 + ", dap an" + dapAnAll +" , diem so hien tai: " + diem);
 
-//        Log.d("MyLog", "Diem so: " + diem);
-//
-//        double diem = 0;
-//        for (int i = 0; i < dapAn.length; i++) {
-//            if (baiLam[i].equals(dapAn[i])) {
-//                diem += baiThi.heDiem;
-//            }
-//        }
-//
-        int soCauDung = 0;
-
-//        String[] dapAn = deThi.dapAn;
-//
-//        for (int i = 0; i < dapAn.length; i++) if (baiLam[i].equals(dapAn[i])) soCauDung++;
-//        diemSo = ((double) soCauDung / (double) dapAn.length) * baiThi.heDiem;
+        diemSo = diem;
         return diemSo;
     }
 

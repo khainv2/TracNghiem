@@ -45,9 +45,14 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 .setOnClickListenter(this, F_DAP_AN)
                 .getView());
         content.addView(new FuncView(inflater)
-                .setText("Chấm bài")
+                .setText("Chấm bài qua camera")
                 .setIconRes(R.drawable.ic_camera_alt_black_24dp)
                 .setOnClickListenter(this, F_CHAM_BAI)
+                .getView());
+        content.addView(new FuncView(inflater)
+                .setText("Chấm bài qua ảnh")
+                .setIconRes(R.drawable.ic_content_copy_black_24dp)
+//                .setOnClickListenter(this, F_CHAM_BAI)
                 .getView());
         content.addView(new FuncView(inflater)
                 .setText("Xem lại")

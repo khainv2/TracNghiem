@@ -24,6 +24,8 @@ public class DeThiActivity extends AppCompatActivity {
     Toolbar toolbar;
     BaiThi baiThi;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
