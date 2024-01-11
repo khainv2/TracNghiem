@@ -17,6 +17,8 @@ class PointMark {
     Point point;
     int col, row;
     int type;
+    // Giá trị màu của điểm (càng lớn càng sáng)
+    double value = 0;
 }
 
 
