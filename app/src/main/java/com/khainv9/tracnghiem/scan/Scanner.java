@@ -539,6 +539,8 @@ public class Scanner {
                     Rect interest = new Rect(ref1, ref3);
                     Mat roi = new Mat(grayImage, interest);
                     Imgproc.GaussianBlur(roi, roi, new Size(5, 5), 0);
+//                    Imgproc.threshold(roi, roi, 200, 255, Imgproc.THRESH_TRUNC);
+
                     Scalar mean = Core.mean(roi);
                     double meanValue = mean.val[0];
 
@@ -552,6 +554,13 @@ public class Scanner {
                     marks[row][col] = mark;
                     Scalar squareArea = new Scalar(200, 200, 200);
                     Imgproc.rectangle(inputFrame, ref1, ref3, squareArea, 1);
+
+                    if (sectionIndex == 2 && col == 3){
+                        Imgproc.rectangle(inputFrame, ref1, ref3, new Scalar(0, 0, 0), 3);
+                        Log.d("MyLog", "Mean value at row " + row + ", col " + col + " = " + String.format("%.2f", meanValue) + " total: " + String.format("%.2f", meanValue * roi.width() * roi.height()));
+//                        Imgproc.putText(inputFrame, , center, FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 0), 1);
+                    }
+
                 }
             }
 
@@ -609,6 +618,10 @@ public class Scanner {
 
             examPaper.sections.add(section);
         }
+//        if (true){
+//            result.resultMat = grayImage;
+//            return result;
+//        }
 
         // Lấy tham số student code
         Section studentCodeSection = examPaper.sections.get(1);
