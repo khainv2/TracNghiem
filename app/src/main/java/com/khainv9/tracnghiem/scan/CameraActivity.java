@@ -33,7 +33,6 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
     private CameraBridgeViewBase mOpenCvCameraView;
     Mat test;
 
-
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -116,8 +115,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-//        if (true)
-//            return test;
+        Log.d("onCameraFrame", "onCameraFrame: " + inputFrame.rgba());
         if (scanner == null) {
             return inputFrame.rgba();
         } else {

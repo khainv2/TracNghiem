@@ -14,12 +14,13 @@ import android.widget.Toast;
 import com.khainv9.tracnghiem.app.Utils;
 
 import com.khainv9.tracnghiem.scan.CameraActivity;
+import com.khainv9.tracnghiem.scan.ScanImageActivity;
 import com.khainv9.tracnghiem.view.FuncView;
 
 
 public class DetailActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static final int F_DAP_AN = 100, F_CHAM_BAI = 101, F_XEM_LAI = 102, F_THONG_KE = 103, F_THONG_TIN = 104;
+    public static final int F_DAP_AN = 100, F_CHAM_BAI = 101, F_XEM_LAI = 102, F_THONG_KE = 103, F_THONG_TIN = 104, F_CHAM_BAI_ANH = 105;
 
     int i;
     Toolbar toolbar;
@@ -52,7 +53,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         content.addView(new FuncView(inflater)
                 .setText("Chấm bài qua ảnh")
                 .setIconRes(R.drawable.ic_content_copy_black_24dp)
-//                .setOnClickListenter(this, F_CHAM_BAI)
+                .setOnClickListenter(this, F_CHAM_BAI_ANH)
                 .getView());
         content.addView(new FuncView(inflater)
                 .setText("Xem lại")
@@ -90,6 +91,20 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                     return;
                 }
                 Intent intent = new Intent(this, CameraActivity.class)
+                        .putExtra(Utils.ARG_P_BAI_THI, i);
+                startActivity(intent);
+                break;
+            }
+            case F_CHAM_BAI_ANH: {
+                if (Utils.dsHocSinh.isEmpty()) {
+                    Toast.makeText(this, "Danh sách học sinh trống", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (Utils.dsBaiThi.get(i).dsDeThi.isEmpty()) {
+                    Toast.makeText(this, "Danh sách đề thi trống", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Intent intent = new Intent(this, ScanImageActivity.class)
                         .putExtra(Utils.ARG_P_BAI_THI, i);
                 startActivity(intent);
                 break;
