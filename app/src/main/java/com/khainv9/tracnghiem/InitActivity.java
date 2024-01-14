@@ -62,7 +62,6 @@ public class InitActivity extends AppCompatActivity {
 
     private void startCamera() {
         if (CAMERA_PERMISSION_GRANT) {
-            Utils.init(this);
             startActivity(new Intent(this, MainActivity.class));
         }
     }

@@ -25,7 +25,7 @@ import com.khainv9.tracnghiem.adapter.DiemThiAdapter;
 import com.khainv9.tracnghiem.adapter.HocSinhAdapter;
 import com.khainv9.tracnghiem.app.Utils;
 import com.khainv9.tracnghiem.models.BaiThi;
-import com.khainv9.tracnghiem.models.HocSinh;
+import com.khainv9.tracnghiem.models.Student;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Chấm trắc nghiệm");
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Chấm trắc nghiệm");
 
         //init
         rv = findViewById(R.id.rv);
@@ -101,14 +101,14 @@ public class MainActivity extends AppCompatActivity
                 .create().show();
     }
 
-    private void createWindowSuaHocSinh(final HocSinh hocSinh) {
+    private void createWindowSuaHocSinh(final Student student) {
         View v2 = getLayoutInflater().inflate(R.layout.screen_hoc_sinh_moi, null);
         final EditText tvTenHS = v2.findViewById(R.id.ed_bai),
                 tvSBD = v2.findViewById(R.id.ed_he_diem),
                 tvLop = v2.findViewById(R.id.ed_lop);
-        tvTenHS.setText(hocSinh.name);
-        tvSBD.setText(hocSinh.sbd);
-        tvLop.setText(hocSinh.class1);
+        tvTenHS.setText(student.name);
+        tvSBD.setText(student.id);
+        tvLop.setText(student.class1);
         new AlertDialog.Builder(this)
                 .setTitle("Sửa học sinh")
                 .setView(v2)
@@ -116,9 +116,9 @@ public class MainActivity extends AppCompatActivity
                     String tenHS = tvTenHS.getText().toString();
                     String sbd = tvSBD.getText().toString();
                     String lop = tvLop.getText().toString();
-                    hocSinh.sbd = sbd;
-                    hocSinh.name = tenHS;
-                    hocSinh.class1 = lop;
+                    student.id = sbd;
+                    student.name = tenHS;
+                    student.class1 = lop;
                     if (tenHS.isEmpty()){
                         Toast.makeText(MainActivity.this, "Tên học sinh không được để trống", Toast.LENGTH_SHORT).show();
                         return;
@@ -127,11 +127,11 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, "SBD không được để trống", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Utils.update(hocSinh);
+                    Utils.update(student);
                     adapter.notifyDataSetChanged();
                 })
                 .setNegativeButton("Xóa", (dialog, which) -> {
-                    Utils.delete(hocSinh);
+                    Utils.delete(student);
                     adapter.notifyDataSetChanged();
                 })
                 .create().show();
@@ -160,8 +160,8 @@ public class MainActivity extends AppCompatActivity
                             Toast.makeText(MainActivity.this, "SBD không được để trống", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        HocSinh hocSinh = new HocSinh(sbd, tenHS, lop);
-                        Utils.update(hocSinh);
+                        Student student = new Student(sbd, tenHS, lop);
+                        Utils.update(student);
                         adapter.notifyDataSetChanged();
                     }
                 })
@@ -339,8 +339,8 @@ public class MainActivity extends AppCompatActivity
                 rv.setAdapter(adapter);
                 break;
             case R.id.nav_hoc_sinh:
-                adapter = new HocSinhAdapter(Utils.dsHocSinh, v -> {
-                    createWindowSuaHocSinh(Utils.dsHocSinh.get(v.getId()));
+                adapter = new HocSinhAdapter(Utils.dsStudent, v -> {
+                    createWindowSuaHocSinh(Utils.dsStudent.get(v.getId()));
                     return true;
                 });
                 rv.setAdapter(adapter);

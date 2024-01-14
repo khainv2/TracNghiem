@@ -5,16 +5,16 @@ import org.msgpack.annotation.Message;
 
 
 @Message
-public class HocSinh {
-    public String sbd;
+public class Student {
+    public String id;
     public String name;
     public String class1;
 
-    public HocSinh() {
+    public Student() {
     }
 
-    public HocSinh(String sbd, String name, String class1) {
-        this.sbd = sbd;
+    public Student(String id, String name, String class1) {
+        this.id = id;
         this.name = name;
         this.class1 = class1;
     }

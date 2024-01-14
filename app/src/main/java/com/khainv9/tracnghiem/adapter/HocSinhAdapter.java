@@ -9,18 +9,18 @@ import android.widget.TextView;
 
 import com.khainv9.tracnghiem.R;
 
-import com.khainv9.tracnghiem.models.HocSinh;
+import com.khainv9.tracnghiem.models.Student;
 
 import java.util.ArrayList;
 
 
 public class HocSinhAdapter extends RecyclerView.Adapter<HocSinhAdapter.HSVH> implements View.OnClickListener {
 
-    ArrayList<HocSinh> ds;
+    ArrayList<Student> ds;
     View.OnLongClickListener onL;
 
-    public HocSinhAdapter(ArrayList<HocSinh> dsHocSinh, View.OnLongClickListener onL) {
-        ds = dsHocSinh;
+    public HocSinhAdapter(ArrayList<Student> dsStudent, View.OnLongClickListener onL) {
+        ds = dsStudent;
         this.onL = onL;
     }
 
@@ -31,10 +31,10 @@ public class HocSinhAdapter extends RecyclerView.Adapter<HocSinhAdapter.HSVH> im
 
     @Override
     public void onBindViewHolder(HSVH holder, int position) {
-        HocSinh hocSinh = ds.get(position);
-        holder.ten.setText(hocSinh.name);
-        holder.sbd.setText(hocSinh.sbd);
-        holder.lop.setText(hocSinh.class1);
+        Student student = ds.get(position);
+        holder.ten.setText(student.name);
+        holder.sbd.setText(student.id);
+        holder.lop.setText(student.class1);
         holder.item.setId(position);
         holder.item.setOnClickListener(this);
         if (onL != null) holder.item.setOnLongClickListener(onL);

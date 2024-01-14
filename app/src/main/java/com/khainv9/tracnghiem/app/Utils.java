@@ -9,7 +9,7 @@ import com.khainv9.tracnghiem.models.BaiThi;
 import com.khainv9.tracnghiem.models.DeThi;
 import com.khainv9.tracnghiem.models.DiemThi;
 import com.khainv9.tracnghiem.models.RawBaiThi;
-import com.khainv9.tracnghiem.models.HocSinh;
+import com.khainv9.tracnghiem.models.Student;
 import com.rantea.rsmanager.StoreManager;
 
 import org.msgpack.MessagePack;
@@ -27,7 +27,7 @@ public class Utils {
     private static final String BAI_THI = "BaiThi", HOC_SINH = "HocSinh", DIEM_THI = "DiemThi", HINH_ANH = "HinhAnh";
 
     public static ArrayList<BaiThi> dsBaiThi;
-    public static ArrayList<HocSinh> dsHocSinh;
+    public static ArrayList<Student> dsStudent;
     public static ArrayList<DiemThi> dsDiemThi;
 
     private static StoreManager storeManager;
@@ -36,7 +36,7 @@ public class Utils {
         storeManager = StoreManager.open(context, dbName, new String[]{BAI_THI, HOC_SINH, DIEM_THI, HINH_ANH});
 
         dsBaiThi = loadBaiThi();
-        dsHocSinh = loadHocSinh();
+        dsStudent = loadHocSinh();
         dsDiemThi = loadDiemThi();
         sort();
     }
@@ -67,8 +67,8 @@ public class Utils {
         return listBaiThi;
     }
 
-    public static ArrayList<HocSinh> loadHocSinh() {
-        return storeManager.loads(HOC_SINH, HocSinh.class);
+    public static ArrayList<Student> loadHocSinh() {
+        return storeManager.loads(HOC_SINH, Student.class);
     }
 
     public static ArrayList<DiemThi> loadDiemThi() {
@@ -103,14 +103,14 @@ public class Utils {
         Log.e("update: DiemThi", restore.toString());
     }
 
-    public static void update(HocSinh hs) {
-        for (int i = 0; i < dsHocSinh.size(); i++) {
-            if (dsHocSinh.get(i).sbd.equals(hs.sbd)) {
-                dsHocSinh.remove(i);
+    public static void update(Student hs) {
+        for (int i = 0; i < dsStudent.size(); i++) {
+            if (dsStudent.get(i).id.equals(hs.id)) {
+                dsStudent.remove(i);
             }
         }
-        dsHocSinh.add(hs);
-        storeManager.overide(HOC_SINH, hs.sbd, 0, hs);
+        dsStudent.add(hs);
+        storeManager.overide(HOC_SINH, hs.id, 0, hs);
     }
 
     public static Bitmap loadImage(String id) {
@@ -142,9 +142,9 @@ public class Utils {
         dsBaiThi.remove(baiThi);
     }
 
-    public static void delete(HocSinh hocSinh) {
-        del(hocSinh);
-        dsHocSinh.remove(hocSinh);
+    public static void delete(Student student) {
+        del(student);
+        dsStudent.remove(student);
     }
 
     public static void delete(DiemThi diemThi) {
@@ -159,8 +159,8 @@ public class Utils {
     }
 
     public static void deleteAllHS() {
-        for (int i = 0; i < dsHocSinh.size(); i++) del(dsHocSinh.get(i));
-        dsHocSinh.clear();
+        for (int i = 0; i < dsStudent.size(); i++) del(dsStudent.get(i));
+        dsStudent.clear();
     }
 
     public static void deleteAllDT() {
@@ -187,12 +187,12 @@ public class Utils {
         storeManager.delete(DIEM_THI, diemThi.id + "");
     }
 
-    private static void del(HocSinh hocSinh) {
-        storeManager.delete(HOC_SINH, hocSinh.sbd);
+    private static void del(Student student) {
+        storeManager.delete(HOC_SINH, student.id);
     }
 
-    public static HocSinh getHocSinh(String sbd) {
-        for (HocSinh baithi : dsHocSinh) if (baithi.sbd.equals(sbd)) return baithi;
-        return dsHocSinh.get(0);
+    public static Student getHocSinh(String sbd) {
+        for (Student baithi : dsStudent) if (baithi.id.equals(sbd)) return baithi;
+        return dsStudent.get(0);
     }
 }

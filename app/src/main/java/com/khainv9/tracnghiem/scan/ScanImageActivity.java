@@ -26,8 +26,13 @@ import com.khainv9.tracnghiem.models.BaiThi;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 public class ScanImageActivity extends AppCompatActivity {
 
@@ -49,41 +54,81 @@ public class ScanImageActivity extends AppCompatActivity {
                     baiThi = new BaiThi("abc", 17, 2, 2);
                 }
                 scanner = new Scanner(baiThi);
+//                String testImage = "/storage/emulated/0/Download/Bluetooth/IMG_20240113_003048.jpg";
+//                readImageFromPath(testImage);
+//
             } else {
                 super.onManagerConnected(status);
             }
         }
     };
 
+    void readImageFromPath(String path) {
+        Log.d("TAG", "readImageFromPath: path = " + path);
+        Mat imageMat = Imgcodecs.imread(path);
+        Log.d(TAG, "onActivityResult: imageMat = " + imageMat);
+
+        // Rotate mat 180 degrees
+        int width = imageMat.width();
+        int height = imageMat.height();
+
+        if (width > height){
+            org.opencv.core.Core.flip(imageMat, imageMat, -1);
+        } else {
+            imageMat = imageMat.t();
+            org.opencv.core.Core.flip(imageMat, imageMat, 0);
+        }
+
+        width = imageMat.width();
+        height = imageMat.height();
+
+        Log.d(TAG, "onActivityResult: next imageMat = " + imageMat);
+        int fixedWidth = height * 1920 / 1080;
+
+        // Create large mat for processing with height and fixedWidth
+        Mat largeMat = new Mat(height, fixedWidth, imageMat.type());
+
+        // Fill all large mat with black color
+        largeMat.setTo(org.opencv.core.Scalar.all(0));
+
+        // Copy imageMat to largeMat
+        Rect roi = new Rect(0, 0, width, height);
+        imageMat.copyTo(largeMat.submat(roi));
+
+
+        Imgproc.resize(largeMat, largeMat, new org.opencv.core.Size(1920, 1080));
+
+        scanner.init(largeMat.width(), largeMat.height());
+        Scanner.ProcessResult result = scanner.processFrame(largeMat);
+        if (!result.info.isEmpty()){
+            largeMat = result.resultMat;
+        }
+
+        // Rotate mat 90 degrees
+        org.opencv.core.Core.flip(largeMat.t(), largeMat, 1);
+//
+//        // Convert mat to bitmap
+        imageMat = largeMat;
+        Bitmap bitmap = Bitmap.createBitmap(imageMat.cols(), imageMat.rows(), Bitmap.Config.ARGB_8888);
+        org.opencv.android.Utils.matToBitmap(imageMat, bitmap);
+//
+
+
+        // Show bitmap to image view
+        ImageView iv = findViewById(R.id.iv_Scanner);
+        iv.setImageBitmap(bitmap);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // Lấy ảnh từ thư viện
         if (requestCode == 0 && resultCode == RESULT_OK && data != null) {
-            ImageView iv = findViewById(R.id.iv_Scanner);
             Uri selectedImageUri = data.getData();
-//            iv.setImageURI(selectedImageUri);
-
-            Mat imageMat = getMatFromUri(this, selectedImageUri);
-            if (imageMat == null) {
-                Log.e(TAG, "onActivityResult: imageMat is null");
-                return;
+            String imagePath = getRealPathFromURI(this, selectedImageUri);
+            Log.d(TAG, "getMatFromUri: imagePath = " + imagePath);
+            if (imagePath != null) {
+                readImageFromPath(imagePath);
             }
-
-            Log.d(TAG, "onActivityResult: imageMat = " + imageMat);
-
-            // Rotate mat 180 degrees
-            org.opencv.core.Core.flip(imageMat, imageMat, -1);
-            int width = imageMat.width();
-            int height = imageMat.height();
-
-
-            // Convert mat to bitmap
-            Bitmap bitmap = Bitmap.createBitmap(imageMat.cols(), imageMat.rows(), Bitmap.Config.ARGB_8888);
-            org.opencv.android.Utils.matToBitmap(imageMat, bitmap);
-
-            // Show bitmap to image view
-            iv.setImageBitmap(bitmap);
         }
     }
 
@@ -100,25 +145,6 @@ public class ScanImageActivity extends AppCompatActivity {
         return filePath;
     }
 
-    public static Mat getMatFromUri(Context context, Uri uri) {
-        // Step 1: Convert the URI to a file path
-        String imagePath = getRealPathFromURI(context, uri);
-
-        Log.d(TAG, "getMatFromUri: imagePath = " + imagePath);
-        if (imagePath == null) {
-            return null; // Error handling
-        }
-
-        // Step 2: Read the image into an OpenCV Mat
-        Mat imageMat = Imgcodecs.imread(imagePath);
-
-        return imageMat;
-    }
-
-    private boolean checkIfAlreadyHavePermission() {
-        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        return result == PackageManager.PERMISSION_GRANTED;
-    }
 
     private void onButtonImageSelect(){
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);

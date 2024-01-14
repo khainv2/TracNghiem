@@ -82,7 +82,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             }
             case F_CHAM_BAI: {
-                if (Utils.dsHocSinh.isEmpty()) {
+                if (Utils.dsStudent.isEmpty()) {
                     Toast.makeText(this, "Danh sách học sinh trống", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -96,7 +96,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             }
             case F_CHAM_BAI_ANH: {
-                if (Utils.dsHocSinh.isEmpty()) {
+                if (Utils.dsStudent.isEmpty()) {
                     Toast.makeText(this, "Danh sách học sinh trống", Toast.LENGTH_SHORT).show();
                     return;
                 }

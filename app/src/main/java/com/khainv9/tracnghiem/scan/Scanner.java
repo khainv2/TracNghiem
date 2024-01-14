@@ -9,14 +9,13 @@ import static java.lang.Math.sqrt;
 
 import android.graphics.Bitmap;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.khainv9.tracnghiem.app.Utils;
 import com.khainv9.tracnghiem.models.BaiThi;
 import com.khainv9.tracnghiem.models.DeThi;
 import com.khainv9.tracnghiem.models.Diem;
 import com.khainv9.tracnghiem.models.DiemThi;
-import com.khainv9.tracnghiem.models.HocSinh;
+import com.khainv9.tracnghiem.models.Student;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvException;
@@ -30,7 +29,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -540,10 +538,31 @@ public class Scanner {
                     Rect interest = new Rect(ref1, ref3);
                     Mat roi = new Mat(grayImage, interest);
                     Imgproc.GaussianBlur(roi, roi, new Size(5, 5), 0);
-//                    Imgproc.threshold(roi, roi, 200, 255, Imgproc.THRESH_TRUNC);
 
                     Scalar mean = Core.mean(roi);
                     double meanValue = mean.val[0];
+
+                    Mat thresholded = new Mat();
+                    Core.compare(roi, new Scalar(meanValue), thresholded, Core.CMP_LT);
+                    double mean2 = Core.mean(roi, thresholded).val[0];
+
+
+//
+//                    // Tính tổng của các pixel có giá trị nhỏ hơn meanValue
+//                    int mean2 = 0;
+//                    int sum2 = 0;
+//                    for (int i = 0; i < roi.rows(); i++){
+//                        for (int j = 0; j < roi.cols(); j++){
+//                            double[] pixel = roi.get(i, j);
+//                            if (pixel[0] < meanValue){
+//                                mean2 += pixel[0];
+//                                sum2 ++;
+//                            }
+//                        }
+//                    }
+//                    mean2 /= sum2;
+
+
 
                     Point center = new Point((ref1.x + ref3.x) / 2, (ref1.y + ref3.y) / 2);
                     PointMark mark = new PointMark();
@@ -551,14 +570,14 @@ public class Scanner {
                     mark.col = col;
                     mark.type = type;
                     mark.point = center;
-                    mark.value = meanValue;
+                    mark.value = mean2;
                     marks[row][col] = mark;
                     Scalar squareArea = new Scalar(200, 200, 200);
                     Imgproc.rectangle(inputFrame, ref1, ref3, squareArea, 1);
 
                     if (sectionIndex == 2 && col == 3){
-                        Imgproc.rectangle(inputFrame, ref1, ref3, new Scalar(0, 0, 0), 3);
-                        Log.d("MyLog", "Mean value at row " + row + ", col " + col + " = " + String.format("%.2f", meanValue) + " total: " + String.format("%.2f", meanValue * roi.width() * roi.height()));
+//                        Imgproc.rectangle(inputFrame, ref1, ref3, new Scalar(0, 0, 0), 3);
+                        Log.d("MyLog", "Mean value at row " + row + ", col " + col + " = " + String.format("%.2f", meanValue) + ", mean2 = " + mean2);
 //                        Imgproc.putText(inputFrame, , center, FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 0), 1);
                     }
 
@@ -635,9 +654,9 @@ public class Scanner {
             }
         }
         String hsName = "";
-        for (HocSinh hocSinh: Utils.dsHocSinh){
-            if (hocSinh.sbd.equals(studentId)){
-                hsName = " [ " + hocSinh.name + " ]";
+        for (Student student : Utils.dsStudent){
+            if (student.id.equals(studentId)){
+                hsName = " [ " + student.name + " ]";
                 break;
             }
         }
