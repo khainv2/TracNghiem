@@ -1,8 +1,5 @@
 package com.khainv9.tracnghiem.scan;
 
-import static org.opencv.core.Core.FONT_HERSHEY_SIMPLEX;
-import static org.opencv.core.CvType.CV_8UC3;
-
 import static java.lang.Math.PI;
 import static java.lang.Math.acos;
 import static java.lang.Math.sqrt;
@@ -11,10 +8,9 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.models.BaiThi;
-import com.khainv9.tracnghiem.models.DeThi;
-import com.khainv9.tracnghiem.models.Diem;
-import com.khainv9.tracnghiem.models.DiemThi;
+import com.khainv9.tracnghiem.models.Examination;
+import com.khainv9.tracnghiem.models.QuestionPaper;
+import com.khainv9.tracnghiem.models.ExamResult;
 import com.khainv9.tracnghiem.models.Student;
 
 import org.opencv.core.Core;
@@ -58,9 +54,9 @@ public class Scanner {
 
     boolean touch = false;
 
-    BaiThi baiThi;
-    Scanner(BaiThi baiThi){
-        this.baiThi = baiThi;
+    Examination examination;
+    Scanner(Examination examination){
+        this.examination = examination;
     }
 
     void calculateVHLines(Point tl, Point tr, Point br, Point bl){
@@ -97,7 +93,7 @@ public class Scanner {
         template = Template.createDefaultTemplate();
 
 
-        src = new Mat(height, width, CV_8UC3);
+        src = new Mat(height, width, CvType.CV_8UC3);
 
         bgrFrame = new Mat();
         bilateralImage = new Mat();
@@ -389,7 +385,7 @@ public class Scanner {
         }
         if (bottomLeftPoints.size() < template.fixedBottomLeft || rightPoints.size() < template.fixedRight || topPoints.size() == 0){
             textDisplay += "Chua tim duoc diem tham chieu";
-            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             putBottomInfo(inputFrame, whiteSquare, cornerBR);
             return result;
         }
@@ -410,8 +406,10 @@ public class Scanner {
 
         if (topPoints.size() < template.fixedTop || rightPoints.size() < template.fixedRight){
             textDisplay += "Chua tim duoc diem tham chieu";
-            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);            Imgproc.putText(whiteSquare, "Top points size " + topPoints.size() + ", right points size " + rightPoints.size() + ", bottom left points size " + bottomLeftPoints.size(), new Point(40, 120), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-            Imgproc.putText(whiteSquare, "Top points size " + topPoints.size() + ", right points size " + rightPoints.size() + ", bottom left points size " + bottomLeftPoints.size(), new Point(40, 120), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "Top points size " + topPoints.size() + ", right points size " + rightPoints.size() + ", bottom left points size " + bottomLeftPoints.size(), new Point(40, 120), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "Top points size " + topPoints.size() + ", right points size " + rightPoints.size() + ", bottom left points size " + bottomLeftPoints.size(), new Point(40, 120), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             putBottomInfo(inputFrame, whiteSquare, cornerBR);
             return result;
         }
@@ -447,11 +445,11 @@ public class Scanner {
         double newAngleTR = calculateAngle(tl, tr, br);
         if (Math.abs(newAngleTR - 90) > DeltaAngle){
             textDisplay = "Goc chua dung, vui long can chinh lai camera";
-            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-            Imgproc.putText(whiteSquare, "angleTR = " + String.format("%.2f", newAngleTR), new Point(40, 120), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "angleTR = " + String.format("%.2f", newAngleTR), new Point(40, 120), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
 
-            Imgproc.putText(whiteSquare, "TL " + tl.x + ", " + tl.y + ", TR " + tr.x + ", " + tr.y + ", BR " + br.x + ", " + br.y, new Point(40, 180), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-            Imgproc.putText(whiteSquare, "BR " + br.x + ", " + br.y, new Point(40, 240), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "TL " + tl.x + ", " + tl.y + ", TR " + tr.x + ", " + tr.y + ", BR " + br.x + ", " + br.y, new Point(40, 180), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "BR " + br.x + ", " + br.y, new Point(40, 240), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             putBottomInfo(inputFrame, whiteSquare, cornerBR);
             return result;
         }
@@ -482,8 +480,8 @@ public class Scanner {
                 || Math.abs(angleTLDegree - 90) > DeltaAngle
                 || Math.abs(angleBRDegree - 90) > DeltaAngle){
             textDisplay = "Goc chua dung, vui long can chinh lai camera";
-            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-            Imgproc.putText(whiteSquare, "angleBL = " + String.format("%.2f", angleBLDegree) + String.format("%.2f", angleTLDegree) + String.format("%.2f", angleBRDegree) , new Point(40, 120), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "angleBL = " + String.format("%.2f", angleBLDegree) + String.format("%.2f", angleTLDegree) + String.format("%.2f", angleBRDegree) , new Point(40, 120), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             putBottomInfo(inputFrame, whiteSquare, cornerBR);
             return result;
         }
@@ -506,9 +504,9 @@ public class Scanner {
         boolean isValidMatch = t1.x == t2.x && t1.y == t2.y;
         if (!isValidMatch){
             textDisplay += "Cac diem tham chieu khong hop le";
-            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-            Imgproc.putText(whiteSquare, "t1 = " + t1.x + ", " + t1.y, new Point(40, 120), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-            Imgproc.putText(whiteSquare, "t2 = " + t2.x + ", " + t2.y, new Point(40, 180), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "t1 = " + t1.x + ", " + t1.y, new Point(40, 120), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(whiteSquare, "t2 = " + t2.x + ", " + t2.y, new Point(40, 180), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
             putBottomInfo(inputFrame, whiteSquare, cornerBR);
 //            while(true);
             return result;
@@ -705,24 +703,24 @@ public class Scanner {
             }
         }
         // Tìm kiếm bài thi có mã đề bằng examCode
-        DeThi deThiFound = null;
+        QuestionPaper questionPaperFound = null;
         String txtDeThi = "";
-        if (baiThi != null){
-            for (DeThi dethi: baiThi.dsDeThi){
+        if (examination != null){
+            for (QuestionPaper dethi: examination.questionPapers){
                 if (dethi.maDeThi.equals(examCode)){
-                    deThiFound = dethi;
+                    questionPaperFound = dethi;
                     break;
                 }
             }
         }
-        if (deThiFound != null){
+        if (questionPaperFound != null){
             txtDeThi = examCode + " OK!";
-            BaiThi bai = Utils.getBaiThi(baiThi.maBaiThi);
-            DeThi de = Utils.getDethi(baiThi, examCode);
+            Examination bai = Utils.getBaiThi(examination.id);
+            QuestionPaper de = Utils.getDethi(examination, examCode);
             if (bai != null && de != null){
-                String dapAnP1[] = de.getDapAnP1();
-                String dapAnP2[] = de.getDapAnP2();
-                String dapAnP3[] = de.getDapAnP3();
+                String[] dapAnP1 = de.getDapAnP1();
+                String[] dapAnP2 = de.getDapAnP2();
+                String[] dapAnP3 = de.getDapAnP3();
                 String p1 = examPaper.chapter1Answer;
                 String p2 = examPaper.chapter2Answer;
                 String p3 = examPaper.chapter3Answer;
@@ -794,16 +792,20 @@ public class Scanner {
                         Imgproc.circle(inputFrame, center, 10, new Scalar(255, 0, 0), 2);
                     }
                 }
-                DiemThi diemThi = new DiemThi(examPaper.studentId,
-                        baiThi.maBaiThi,
+                ExamResult examResult = new ExamResult(examPaper.studentId,
+                        examination.id,
                         examPaper.examCode,
-                        matToBitmap(inputFrame),
+                        null,
                         new String[] { examPaper.chapter1Answer, examPaper.chapter2Answer, examPaper.chapter3Answer },
                         false
                 );
-                Diem diem = diemThi.chamBai();
-                Imgproc.putText(whiteSquare, "Diem thi P1: " + diem.p1 + ", P2: " + diem.p2 + ", P3: " + diem.p3 + ", Tong " + diem.total(), new Point(40, 180), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-                Imgproc.putText(whiteSquare, "Cham de luu ket qua", new Point(40, 240), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+                ExamResult.Score score = examResult.chamBai();
+                Imgproc.putText(whiteSquare, "Diem thi P1: " + score.p1 + ", P2: " + score.p2 + ", P3: " + score.p3 + ", Tong " + score.total(), new Point(40, 180), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+                Imgproc.putText(whiteSquare, "Cham de luu ket qua", new Point(40, 240), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+
+//                Imgproc.putText(whiteSquare, examPaper.chapter1Answer + " " + examPaper.chapter2Answer + " " + examPaper.chapter3Answer, new Point(40, 300), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+//                Imgproc.putText(whiteSquare, dapAnP1[0] + " " + dapAnP2[0] + " " + dapAnP3[0], new Point(40, 360), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+//
             }
         } else {
             txtDeThi = examCode + " [Sai ma de thi]!";
@@ -811,26 +813,26 @@ public class Scanner {
         examPaper.examCode = examCode;
 
 
-        Imgproc.putText(whiteSquare, "Ma de: " + txtDeThi, new Point(40, 60), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(whiteSquare, "SBD: " + studentId, new Point(40, 120), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(whiteSquare, "Ma de: " + txtDeThi, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(whiteSquare, "SBD: " + studentId, new Point(40, 120), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
         putBottomInfo(inputFrame, whiteSquare, cornerBR);
 
 
 
         if (touch){
             touch = false;
-            DiemThi diemThi = new DiemThi(examPaper.studentId,
-                    baiThi.maBaiThi,
+            ExamResult examResult = new ExamResult(examPaper.studentId,
+                    examination.id,
                     examPaper.examCode,
                     matToBitmap(inputFrame),
                     new String[] { examPaper.chapter1Answer, examPaper.chapter2Answer, examPaper.chapter3Answer },
                     true
             );
-            Utils.update(diemThi);
+            Utils.update(examResult);
 
             result.info = "Đã lưu kết quả chấm";
 
-            Log.d("MyLog", "Diem thi: " + diemThi.toString());
+            Log.d("MyLog", "Diem thi: " + examResult.toString());
         }
 
         return result;

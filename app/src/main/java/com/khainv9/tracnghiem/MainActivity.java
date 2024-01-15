@@ -24,7 +24,7 @@ import com.khainv9.tracnghiem.adapter.BaiThiAdapter;
 import com.khainv9.tracnghiem.adapter.DiemThiAdapter;
 import com.khainv9.tracnghiem.adapter.HocSinhAdapter;
 import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.models.BaiThi;
+import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.Student;
 
 public class MainActivity extends AppCompatActivity
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void createWindowSuaBaiThi(final BaiThi baiThi) {
+    private void createWindowSuaBaiThi(final Examination examination) {
         View v = getLayoutInflater().inflate(R.layout.screen_bai_moi, null);
         final EditText tvTenBai = v.findViewById(R.id.ed_bai),
                 edPhan1 = v.findViewById(R.id.ed_p1),
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
                 edPhan3 = v.findViewById(R.id.ed_p3),
                 edTotal = v.findViewById(R.id.ed_number_total);
         syncDiemBaiThi(edPhan1, edPhan2, edPhan3, edTotal);
-        tvTenBai.setText(baiThi.tenBaiThi);
+        tvTenBai.setText(examination.name);
         new AlertDialog.Builder(this)
                 .setTitle("Sửa bài thi")
                 .setView(v)
@@ -87,15 +87,15 @@ public class MainActivity extends AppCompatActivity
                     int p1 = Integer.parseInt(edPhan1.getText().toString());
                     int p2 = Integer.parseInt(edPhan2.getText().toString());
                     int p3 = Integer.parseInt(edPhan3.getText().toString());
-                    baiThi.tenBaiThi = sTen;
-                    baiThi.soCauPhan1 = p1;
-                    baiThi.soCauPhan2 = p2;
-                    baiThi.soCauPhan3 = p3;
-                    Utils.update(baiThi);
+                    examination.name = sTen;
+                    examination.chapterACount = p1;
+                    examination.chapterBCount = p2;
+                    examination.chapterCCount = p3;
+                    Utils.update(examination);
                     adapter.notifyDataSetChanged();
                 })
                 .setNegativeButton("Xóa", (dialog, which) -> {
-                    Utils.delete(baiThi);
+                    Utils.delete(examination);
                     adapter.notifyDataSetChanged();
                 })
                 .create().show();
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity
                 tvLop = v2.findViewById(R.id.ed_lop);
         tvTenHS.setText(student.name);
         tvSBD.setText(student.id);
-        tvLop.setText(student.class1);
+        tvLop.setText(student.iclass);
         new AlertDialog.Builder(this)
                 .setTitle("Sửa học sinh")
                 .setView(v2)
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity
                     String lop = tvLop.getText().toString();
                     student.id = sbd;
                     student.name = tenHS;
-                    student.class1 = lop;
+                    student.iclass = lop;
                     if (tenHS.isEmpty()){
                         Toast.makeText(MainActivity.this, "Tên học sinh không được để trống", Toast.LENGTH_SHORT).show();
                         return;
@@ -265,8 +265,8 @@ public class MainActivity extends AppCompatActivity
                         int p2 = Integer.parseInt(edPhan2.getText().toString());
                         int p3 = Integer.parseInt(edPhan3.getText().toString());
                         String sTen = tvTenBai.getText().toString();
-                        BaiThi baiThi = new BaiThi(sTen, p1, p2, p3);
-                        Utils.update(baiThi);
+                        Examination examination = new Examination(sTen, p1, p2, p3);
+                        Utils.update(examination);
                         adapter.notifyDataSetChanged();
                     }
                 })
@@ -332,8 +332,8 @@ public class MainActivity extends AppCompatActivity
         }
         switch (idSelected) {
             case R.id.nav_bai_thi:
-                adapter = new BaiThiAdapter(Utils.dsBaiThi, v -> {
-                    createWindowSuaBaiThi(Utils.dsBaiThi.get(v.getId()));
+                adapter = new BaiThiAdapter(Utils.dsExamination, v -> {
+                    createWindowSuaBaiThi(Utils.dsExamination.get(v.getId()));
                     return true;
                 });
                 rv.setAdapter(adapter);
@@ -346,7 +346,7 @@ public class MainActivity extends AppCompatActivity
                 rv.setAdapter(adapter);
                 break;
             case R.id.nav_xem_diem:
-                adapter = new DiemThiAdapter(Utils.dsDiemThi);
+                adapter = new DiemThiAdapter(Utils.dsExamResult);
                 rv.setAdapter(adapter);
                 break;
             case R.id.nav_giay_thi:

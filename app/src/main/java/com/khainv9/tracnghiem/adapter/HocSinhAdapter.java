@@ -34,7 +34,7 @@ public class HocSinhAdapter extends RecyclerView.Adapter<HocSinhAdapter.HSVH> im
         Student student = ds.get(position);
         holder.ten.setText(student.name);
         holder.sbd.setText(student.id);
-        holder.lop.setText(student.class1);
+        holder.lop.setText(student.iclass);
         holder.item.setId(position);
         holder.item.setOnClickListener(this);
         if (onL != null) holder.item.setOnLongClickListener(onL);

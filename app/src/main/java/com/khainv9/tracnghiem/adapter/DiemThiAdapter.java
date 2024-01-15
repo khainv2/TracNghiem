@@ -12,8 +12,8 @@ import com.khainv9.tracnghiem.R;
 import com.khainv9.tracnghiem.ImageActivity;
 
 import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.models.BaiThi;
-import com.khainv9.tracnghiem.models.DiemThi;
+import com.khainv9.tracnghiem.models.Examination;
+import com.khainv9.tracnghiem.models.ExamResult;
 
 import java.util.ArrayList;
 
@@ -21,10 +21,10 @@ import java.util.ArrayList;
 public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
         implements View.OnClickListener, View.OnLongClickListener {
 
-    ArrayList<DiemThi> ds;
+    ArrayList<ExamResult> ds;
 
-    public DiemThiAdapter(ArrayList<DiemThi> dsDiemThi) {
-        ds = dsDiemThi;
+    public DiemThiAdapter(ArrayList<ExamResult> dsExamResult) {
+        ds = dsExamResult;
     }
 
     @Override
@@ -34,11 +34,11 @@ public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
 
     @Override
     public void onBindViewHolder(DTVH holder, int position) {
-        DiemThi d = ds.get(position);
+        ExamResult d = ds.get(position);
         holder.tenTs.setText(Utils.getHocSinh(d.sbd).name);
         holder.sbd.setText("SBD: " + d.sbd);
-        BaiThi baiThi = Utils.getBaiThi(d.maBaiThi);
-        holder.tenBaiThi.setText(baiThi.tenBaiThi);
+        Examination examination = Utils.getBaiThi(d.maBaiThi);
+        holder.tenBaiThi.setText(examination.name);
         holder.maDe.setText(d.maDeThi);
         holder.soDiem.setText(String.format("%.2f điểm", d.diemSo, 93));
 

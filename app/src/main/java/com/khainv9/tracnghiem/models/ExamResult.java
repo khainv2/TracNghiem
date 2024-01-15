@@ -11,7 +11,16 @@ import java.util.Random;
 
 
 @Message
-public class  DiemThi {
+public class ExamResult {
+
+    public static class Score {
+        Score() {}
+
+        public double p1, p2, p3;
+        public double total() {
+            return p1 + p2 + p3;
+        }
+    }
 
     public int id;
     public String sbd;
@@ -20,10 +29,7 @@ public class  DiemThi {
     public String[] baiLam;
     public double diemSo;
 
-    public DiemThi() {
-    }
-
-    public DiemThi(String sbd, int maBaiThi, String maDeThi, Bitmap anhBaiThi, String[] baiLam, boolean isSaveImage) {
+    public ExamResult(String sbd, int maBaiThi, String maDeThi, Bitmap anhBaiThi, String[] baiLam, boolean isSaveImage) {
         this.id = new Random().nextInt();
         this.sbd = sbd;
         this.maBaiThi = maBaiThi;
@@ -34,14 +40,14 @@ public class  DiemThi {
         this.diemSo = chamBai().total();
     }
 
-    public Diem chamBai() {
-        BaiThi baiThi = Utils.getBaiThi(maBaiThi);
-        DeThi deThi = Utils.getDethi(baiThi, maDeThi);
-        if (baiThi == null || deThi == null)
-            return new Diem();
-        String dapAnP1[] = deThi.getDapAnP1();
-        String dapAnP2[] = deThi.getDapAnP2();
-        String dapAnP3[] = deThi.getDapAnP3();
+    public Score chamBai() {
+        Examination examination = Utils.getBaiThi(maBaiThi);
+        QuestionPaper questionPaper = Utils.getDethi(examination, maDeThi);
+        if (examination == null || questionPaper == null)
+            return new Score();
+        String[] dapAnP1 = questionPaper.getDapAnP1();
+        String[] dapAnP2 = questionPaper.getDapAnP2();
+        String[] dapAnP3 = questionPaper.getDapAnP3();
 
         String p1 = baiLam[0];
         String p2 = baiLam[1];
@@ -65,16 +71,16 @@ public class  DiemThi {
             String expected = dapAnP2[i];
             if (expected.equals(actual)){
                 count++;
-                if (i % 4 == 3){
-                    if (count == 2){
-                        diemP2 += 0.25;
-                    } else if (count == 3){
-                        diemP2 += 0.5;
-                    } else if (count == 4){
-                        diemP2 += 1;
-                    }
-                    count = 0;
+            }
+            if (i % 4 == 3){
+                if (count == 2){
+                    diemP2 += 0.25;
+                } else if (count == 3){
+                    diemP2 += 0.5;
+                } else if (count == 4){
+                    diemP2 += 1;
                 }
+                count = 0;
             }
         }
 
@@ -86,24 +92,24 @@ public class  DiemThi {
             String expected = dapAnP3[i];
             if (expected.equals(actual)){
                 count++;
-                if (i % 4 == 3){
-                    if (count == 4){
-                        diemP3 += 0.25;
-                    }
-                    count = 0;
+            }
+            if (i % 4 == 3){
+                if (count == 4){
+                    diemP3 += 0.25;
                 }
+                count = 0;
             }
         }
 
         String dapAnAll = "";
-        for (int i = 0; i < deThi.dapAn.length; i++) dapAnAll += deThi.dapAn[i];
+        for (int i = 0; i < questionPaper.dapAn.length; i++) dapAnAll += questionPaper.dapAn[i];
         Log.d("MyLog", "Start cham bai, bai lam: " + p1 + p2 + p3 + ", dap an" + dapAnAll +" , diem so hien tai: " + diemP1 + " " + diemP2 + " " + diemP3);
 
-        Diem diemSo = new Diem();
-        diemSo.p1 = diemP1;
-        diemSo.p2 = diemP2;
-        diemSo.p3 = diemP3;
-        return diemSo;
+        Score scoreSo = new Score();
+        scoreSo.p1 = diemP1;
+        scoreSo.p2 = diemP2;
+        scoreSo.p3 = diemP3;
+        return scoreSo;
     }
 
     public Bitmap getAnhBaiThi() {

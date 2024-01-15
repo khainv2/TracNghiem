@@ -86,7 +86,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                     Toast.makeText(this, "Danh sách học sinh trống", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (Utils.dsBaiThi.get(i).dsDeThi.isEmpty()) {
+                if (Utils.dsExamination.get(i).questionPapers.size() == 0) {
                     Toast.makeText(this, "Danh sách đề thi trống", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -100,7 +100,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                     Toast.makeText(this, "Danh sách học sinh trống", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (Utils.dsBaiThi.get(i).dsDeThi.isEmpty()) {
+                if (Utils.dsExamination.get(i).questionPapers.size() == 0) {
                     Toast.makeText(this, "Danh sách đề thi trống", Toast.LENGTH_SHORT).show();
                     return;
                 }

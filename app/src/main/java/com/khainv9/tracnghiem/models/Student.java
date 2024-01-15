@@ -8,14 +8,12 @@ import org.msgpack.annotation.Message;
 public class Student {
     public String id;
     public String name;
-    public String class1;
+    public String iclass;
 
-    public Student() {
-    }
-
-    public Student(String id, String name, String class1) {
+    public Student() {}
+    public Student(String id, String name, String iclass) {
         this.id = id;
         this.name = name;
-        this.class1 = class1;
+        this.iclass = iclass;
     }
 }

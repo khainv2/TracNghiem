@@ -10,8 +10,8 @@ import android.view.MenuItem;
 
 import com.khainv9.tracnghiem.adapter.DiemThiAdapter;
 import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.models.BaiThi;
-import com.khainv9.tracnghiem.models.DiemThi;
+import com.khainv9.tracnghiem.models.Examination;
+import com.khainv9.tracnghiem.models.ExamResult;
 
 import java.util.ArrayList;
 
@@ -21,7 +21,7 @@ public class InfoActivity extends AppCompatActivity {
     DiemThiAdapter diemThiAdapter;
     int i;
     Toolbar toolbar;
-    BaiThi baiThi;
+    Examination examination;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,15 +34,15 @@ public class InfoActivity extends AppCompatActivity {
 
         //lấy vị trí của bài thi trong intent gửi đến
         i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-        baiThi = Utils.dsBaiThi.get(i);
+        examination = Utils.dsExamination.get(i);
         //init
         rv = findViewById(R.id.rv);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-        ArrayList<DiemThi> list = new ArrayList<>();
-        for (int j = 0; j < Utils.dsDiemThi.size(); j++) {
-            DiemThi diemThi = Utils.dsDiemThi.get(j);
-            if (diemThi.maBaiThi == baiThi.maBaiThi) list.add(diemThi);
+        ArrayList<ExamResult> list = new ArrayList<>();
+        for (int j = 0; j < Utils.dsExamResult.size(); j++) {
+            ExamResult examResult = Utils.dsExamResult.get(j);
+            if (examResult.maBaiThi == examination.id) list.add(examResult);
         }
         rv.setAdapter(diemThiAdapter = new DiemThiAdapter(list));
     }

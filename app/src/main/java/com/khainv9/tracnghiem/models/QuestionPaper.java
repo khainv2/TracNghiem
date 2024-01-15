@@ -6,25 +6,18 @@ import java.util.Random;
 
 
 @Message
-public class DeThi {
+public class QuestionPaper {
+    public static final String NOT = "_";
 
-    public static final String A = "A", B = "B", C = "C", D = "D", E = "E", NOT = "_";
-
-    public int id;
-    public int maBaiThi;
     public String maDeThi;
 
     public int soCauPhan1, soCauPhan2, soCauPhan3; // Mỗi câu ở phần 2 và 3 bao gồm 4 ý
     public String[] dapAn;
 
-
-
-    public DeThi() {
+    public QuestionPaper() {
     }
 
-    public DeThi(int maBaiThi, int soCauPhan1, int soCauPhan2, int soCauPhan3) {
-        this.id = new Random().nextInt();
-        this.maBaiThi = maBaiThi;
+    public QuestionPaper(int soCauPhan1, int soCauPhan2, int soCauPhan3) {
         this.maDeThi = "";
 
         this.soCauPhan1 = soCauPhan1;

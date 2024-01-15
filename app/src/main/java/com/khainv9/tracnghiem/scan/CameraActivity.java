@@ -1,7 +1,5 @@
 package com.khainv9.tracnghiem.scan;
 
-import static org.opencv.core.CvType.CV_8UC3;
-
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,13 +9,12 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.models.BaiThi;
+import com.khainv9.tracnghiem.models.Examination;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -38,7 +35,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         public void onManagerConnected(int status) {
             if (status == LoaderCallbackInterface.SUCCESS) {
                 Log.i(TAG, "OpenCV loaded successfully");
-                mOpenCvCameraView.enableView();
+                mOpenCvCameraView.enableView()  ;
                 mOpenCvCameraView.setOnTouchListener(CameraActivity.this);
 
                 // Load image from R.drawable.test to bitmap
@@ -54,7 +51,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
-    BaiThi baiThi;
+    Examination examination;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,12 +66,12 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
         //lấy vị trí của bài thi trong intent gửi đến
         int i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-        if (i >= 0 && i < Utils.dsBaiThi.size()){
-            baiThi = Utils.dsBaiThi.get(i);
+        if (i >= 0 && i < Utils.dsExamination.size()){
+            examination = Utils.dsExamination.get(i);
         } else {
-            baiThi = new BaiThi("abc", 17, 2, 2);
+            examination = new Examination("abc", 17, 2, 2);
         }
-        scanner = new Scanner(baiThi);
+        scanner = new Scanner(examination);
 
         Toast.makeText(this, "Chạm để bắt đầu chấm bài", Toast.LENGTH_SHORT).show();
     }

@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.models.DiemThi;
+import com.khainv9.tracnghiem.models.ExamResult;
 
 
 public class ImageActivity extends AppCompatActivity {
@@ -71,12 +71,12 @@ public class ImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image);
 
         int i = getIntent().getIntExtra("i", 0);
-        DiemThi diemThi = Utils.dsDiemThi.get(i);
+        ExamResult examResult = Utils.dsExamResult.get(i);
 
         ImageView imageView = (ImageView) findViewById(R.id.imageFullScreen);
 
 //        Bitmap bm = null;
-        Bitmap bm = diemThi.getAnhBaiThi();
+        Bitmap bm = examResult.getAnhBaiThi();
         if (bm != null) {
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
@@ -85,7 +85,7 @@ public class ImageActivity extends AppCompatActivity {
         }
 
         Button bt = (Button) findViewById(R.id.dummy_button);
-        bt.setText(Utils.getBaiThi(diemThi.maBaiThi).tenBaiThi);
+        bt.setText(Utils.getBaiThi(examResult.maBaiThi).name);
 
         bt.setOnClickListener(new View.OnClickListener() {
             @Override

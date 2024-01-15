@@ -12,18 +12,18 @@ import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.MaDeActivity;
 import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.models.BaiThi;
-import com.khainv9.tracnghiem.models.DeThi;
+import com.khainv9.tracnghiem.models.Examination;
+import com.khainv9.tracnghiem.models.QuestionPaper;
 
 
 public class DeThiAdapter extends RecyclerView.Adapter<DeThiAdapter.BTVH> implements View.OnClickListener {
 
     int iBT;
-    BaiThi baiThi;
+    Examination examination;
 
     public DeThiAdapter(int iBT) {
         this.iBT = iBT;
-        baiThi = Utils.dsBaiThi.get(iBT);
+        examination = Utils.dsExamination.get(iBT);
     }
 
     @Override
@@ -33,8 +33,8 @@ public class DeThiAdapter extends RecyclerView.Adapter<DeThiAdapter.BTVH> implem
 
     @Override
     public void onBindViewHolder(BTVH holder, int position) {
-        DeThi deThi = baiThi.dsDeThi.get(position);
-        holder.ma.setText("" + deThi.maDeThi);
+        QuestionPaper questionPaper = examination.questionPapers.get(position);
+        holder.ma.setText("" + questionPaper.maDeThi);
         holder.item.setId(position);
         holder.item.setOnClickListener(this);
         holder.item.setOnLongClickListener(v -> {
@@ -43,8 +43,8 @@ public class DeThiAdapter extends RecyclerView.Adapter<DeThiAdapter.BTVH> implem
             builder.setTitle("Xóa đề thi");
             builder.setMessage("Bạn có chắc chắn muốn xóa đề thi này?");
             builder.setPositiveButton("Xóa", (dialog, which) -> {
-                baiThi.dsDeThi.remove(position);
-                Utils.update(baiThi);
+                examination.questionPapers.remove(position);
+                Utils.update(examination);
                 notifyDataSetChanged();
             });
             builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
@@ -66,7 +66,7 @@ public class DeThiAdapter extends RecyclerView.Adapter<DeThiAdapter.BTVH> implem
 
     @Override
     public int getItemCount() {
-        return baiThi.dsDeThi.size();
+        return examination.questionPapers.size();
     }
 
 

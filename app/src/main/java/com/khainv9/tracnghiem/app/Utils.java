@@ -5,10 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.khainv9.tracnghiem.models.BaiThi;
-import com.khainv9.tracnghiem.models.DeThi;
-import com.khainv9.tracnghiem.models.DiemThi;
-import com.khainv9.tracnghiem.models.RawBaiThi;
+import com.khainv9.tracnghiem.models.Examination;
+import com.khainv9.tracnghiem.models.QuestionPaper;
+import com.khainv9.tracnghiem.models.ExamResult;
 import com.khainv9.tracnghiem.models.Student;
 import com.rantea.rsmanager.StoreManager;
 
@@ -23,32 +22,32 @@ import java.util.Date;
 public class Utils {
 
     public static String ARG_P_BAI_THI = "P_BAI_THI", ARG_P_DE_THI = "P_DE_THI";
-    private static final String dbName = "test2.sqlite";
+    private static final String dbName = "test6.sqlite";
     private static final String BAI_THI = "BaiThi", HOC_SINH = "HocSinh", DIEM_THI = "DiemThi", HINH_ANH = "HinhAnh";
 
-    public static ArrayList<BaiThi> dsBaiThi;
+    public static ArrayList<Examination> dsExamination;
     public static ArrayList<Student> dsStudent;
-    public static ArrayList<DiemThi> dsDiemThi;
+    public static ArrayList<ExamResult> dsExamResult;
 
     private static StoreManager storeManager;
 
     public static void init(Context context) {
         storeManager = StoreManager.open(context, dbName, new String[]{BAI_THI, HOC_SINH, DIEM_THI, HINH_ANH});
 
-        dsBaiThi = loadBaiThi();
+        dsExamination = loadBaiThi();
         dsStudent = loadHocSinh();
-        dsDiemThi = loadDiemThi();
+        dsExamResult = loadDiemThi();
         sort();
     }
 
     private static void sort() {
-        for (int i = 0; i < dsBaiThi.size(); i++) {
-            for (int j = i + 1; j < dsBaiThi.size(); j++) {
-                BaiThi bt1 = dsBaiThi.get(i);
-                BaiThi bt2 = dsBaiThi.get(j);
+        for (int i = 0; i < dsExamination.size(); i++) {
+            for (int j = i + 1; j < dsExamination.size(); j++) {
+                Examination bt1 = dsExamination.get(i);
+                Examination bt2 = dsExamination.get(j);
                 if (bt1.getLNgayTao() > bt2.getLNgayTao()) {
-                    dsBaiThi.set(i, bt2);
-                    dsBaiThi.set(j, bt1);
+                    dsExamination.set(i, bt2);
+                    dsExamination.set(j, bt1);
                 }
             }
         }
@@ -58,48 +57,44 @@ public class Utils {
         return String.format("%s tháng %s lúc %s:%s", date.getDate(), date.getMonth() + 1, date.getHours(), date.getMinutes());
     }
 
-    public static ArrayList<BaiThi> loadBaiThi() {
-        ArrayList<RawBaiThi> raws = storeManager.loads(BAI_THI, RawBaiThi.class);
-        ArrayList<BaiThi> listBaiThi = new ArrayList<>();
-        for (int i = 0; i < raws.size(); i++) {
-            listBaiThi.add(RawBaiThi.decode(raws.get(i)));
-        }
-        return listBaiThi;
+    public static ArrayList<Examination> loadBaiThi() {
+        return storeManager.loads(BAI_THI, Examination.class);
     }
 
     public static ArrayList<Student> loadHocSinh() {
         return storeManager.loads(HOC_SINH, Student.class);
     }
 
-    public static ArrayList<DiemThi> loadDiemThi() {
-        return storeManager.loads(DIEM_THI, DiemThi.class);
+    public static ArrayList<ExamResult> loadDiemThi() {
+        return storeManager.loads(DIEM_THI, ExamResult.class);
     }
 
-    public static void update(BaiThi baiThi) {
-        for (int i = 0; i < dsBaiThi.size(); i++) {
-            if (dsBaiThi.get(i).maBaiThi == baiThi.maBaiThi) {
-                dsBaiThi.remove(i);
+    public static void update(Examination examination) {
+        for (int i = 0; i < dsExamination.size(); i++) {
+            if (dsExamination.get(i).id == examination.id) {
+                dsExamination.remove(i);
+                break;
             }
         }
-        dsBaiThi.add(baiThi);
-        RawBaiThi raw = RawBaiThi.encode(baiThi);
-        storeManager.overide(BAI_THI, baiThi.maBaiThi + "", 0, raw);
+        dsExamination.add(examination);
+        Log.d("Util", "Write bai thi with ds de thi " + examination.questionPapers.size());
+        storeManager.overide(BAI_THI, examination.id + "", 0, examination);
     }
 
-    public static void update(DiemThi diemThi) {
-        dsDiemThi.add(diemThi);
+    public static void update(ExamResult examResult) {
+        dsExamResult.add(examResult);
 
         MessagePack msgpack = storeManager.getMessagePack();
         try {
-            byte[] b = msgpack.write(diemThi);
-            storeManager.overide(DIEM_THI, String.valueOf(diemThi.id), 0, b);
-            DiemThi restore = msgpack.read(b, DiemThi.class);
+            byte[] b = msgpack.write(examResult);
+            storeManager.overide(DIEM_THI, String.valueOf(examResult.id), 0, b);
+            ExamResult restore = msgpack.read(b, ExamResult.class);
             Log.d("update: DiemThi", restore.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        storeManager.overide(DIEM_THI, diemThi.id + "", 0, diemThi);
-        DiemThi restore = storeManager.load(DIEM_THI, String.valueOf(diemThi.id), DiemThi.class);
+        storeManager.overide(DIEM_THI, examResult.id + "", 0, examResult);
+        ExamResult restore = storeManager.load(DIEM_THI, String.valueOf(examResult.id), ExamResult.class);
         Log.e("update: DiemThi", restore.toString());
     }
 
@@ -137,9 +132,9 @@ public class Utils {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
-    public static void delete(BaiThi baiThi) {
-        del(baiThi);
-        dsBaiThi.remove(baiThi);
+    public static void delete(Examination examination) {
+        del(examination);
+        dsExamination.remove(examination);
     }
 
     public static void delete(Student student) {
@@ -147,15 +142,15 @@ public class Utils {
         dsStudent.remove(student);
     }
 
-    public static void delete(DiemThi diemThi) {
-        del(diemThi);
-        storeManager.delete(HINH_ANH, diemThi.id + "");
-        dsDiemThi.remove(diemThi);
+    public static void delete(ExamResult examResult) {
+        del(examResult);
+        storeManager.delete(HINH_ANH, examResult.id + "");
+        dsExamResult.remove(examResult);
     }
 
     public static void deleteAllBT() {
-        for (int i = 0; i < dsBaiThi.size(); i++) del(dsBaiThi.get(i));
-        dsBaiThi.clear();
+        for (int i = 0; i < dsExamination.size(); i++) del(dsExamination.get(i));
+        dsExamination.clear();
     }
 
     public static void deleteAllHS() {
@@ -164,27 +159,27 @@ public class Utils {
     }
 
     public static void deleteAllDT() {
-        for (int i = 0; i < dsDiemThi.size(); i++) del(dsDiemThi.get(i));
-        dsDiemThi.clear();
+        for (int i = 0; i < dsExamResult.size(); i++) del(dsExamResult.get(i));
+        dsExamResult.clear();
     }
 
-    public static BaiThi getBaiThi(int maBaiThi) {
-        for (BaiThi baithi : dsBaiThi) if (baithi.maBaiThi == maBaiThi) return baithi;
-        return dsBaiThi.get(0);
+    public static Examination getBaiThi(int maBaiThi) {
+        for (Examination baithi : dsExamination) if (baithi.id == maBaiThi) return baithi;
+        return dsExamination.get(0);
     }
 
-    public static DeThi getDethi(BaiThi baiThi, String maDeThi) {
-        for (int i = 0; i < baiThi.dsDeThi.size(); i++)
-            if (baiThi.dsDeThi.get(i).maDeThi.equals(maDeThi)) return baiThi.dsDeThi.get(i);
-        return baiThi.dsDeThi.get(0);
+    public static QuestionPaper getDethi(Examination examination, String maDeThi) {
+        for (int i = 0; i < examination.questionPapers.size(); i++)
+            if (examination.questionPapers.get(i).maDeThi.equals(maDeThi)) return examination.questionPapers.get(i);
+        return null;
     }
 
-    private static void del(BaiThi baiThi) {
-        storeManager.delete(BAI_THI, baiThi.maBaiThi + "");
+    private static void del(Examination examination) {
+        storeManager.delete(BAI_THI, examination.id + "");
     }
 
-    private static void del(DiemThi diemThi) {
-        storeManager.delete(DIEM_THI, diemThi.id + "");
+    private static void del(ExamResult examResult) {
+        storeManager.delete(DIEM_THI, examResult.id + "");
     }
 
     private static void del(Student student) {

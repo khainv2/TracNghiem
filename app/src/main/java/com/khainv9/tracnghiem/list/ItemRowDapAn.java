@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.khainv9.tracnghiem.R;
 
-import static com.khainv9.tracnghiem.models.DeThi.NOT;
+import static com.khainv9.tracnghiem.models.QuestionPaper.NOT;
 
 
 public class ItemRowDapAn extends ListMini implements View.OnClickListener {

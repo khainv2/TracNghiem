@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,17 +16,9 @@ import com.khainv9.tracnghiem.app.Utils;
 import com.khainv9.tracnghiem.fragment.DapAnFragment;
 import com.khainv9.tracnghiem.fragment.MaDeFragment;
 import com.khainv9.tracnghiem.fragment.SSPAdapter;
-import com.khainv9.tracnghiem.models.BaiThi;
-import com.khainv9.tracnghiem.models.DeThi;
+import com.khainv9.tracnghiem.models.Examination;
+import com.khainv9.tracnghiem.models.QuestionPaper;
 
-/*
-    TODO:
-    Khi edit học sinh, cần notify lại thông tin số báo danh
-    Đổi tên tab Đáp án thành Đề thi
-//    Bỏ ô vuông đầu trong
-
-
- */
 
 public class MaDeActivity extends AppCompatActivity implements View.OnClickListener, TabLayout.OnTabSelectedListener {
 
@@ -38,8 +32,8 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
     MaDeFragment sMaDe;
     DapAnFragment sDapAn;
 
-    public BaiThi baiThi;
-    public DeThi deThi;
+    public Examination examination;
+    public QuestionPaper questionPaper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +46,27 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
 
         //lấy vị trí của bài thi trong intent gửi đến
         iBT = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-        baiThi = Utils.dsBaiThi.get(iBT);
+        examination = Utils.dsExamination.get(iBT);
+        if (examination == null){
+            Log.e("MaDeActivity", "onCreate: baiThi null");
+            finish();
+        } else {
+            Log.d("MaDeActivity", "onCreate: baiThi " + examination.questionPapers.size());
+        }
+
         iDT = getIntent().getIntExtra(Utils.ARG_P_DE_THI, THEM_MOI);
         if (iDT == THEM_MOI) {
-            iDT = baiThi.dsDeThi.size();
-            deThi = baiThi.addDeThi();
+            iDT = examination.questionPapers.size();
+            questionPaper = new QuestionPaper(examination.chapterACount, examination.chapterBCount, examination.chapterCCount);
+            examination.questionPapers.add(questionPaper);
+        } else {
+            questionPaper = examination.questionPapers.get(iDT);
         }
-        deThi = baiThi.dsDeThi.get(iDT);
+
+        Log.d("MaDeActivity", "onCreate: iBT = " + iBT + ", iDT = " + iDT + ", deThi " + questionPaper);
+        for (int i = 0; i < examination.questionPapers.size(); i++) {
+            Log.d("MaDeActivity", "onCreate: " + examination.questionPapers.get(i));
+        }
 
         viewPager = findViewById(R.id.vp);
         tabLayout = (TabLayout) findViewById(R.id.tab);
@@ -67,8 +75,8 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
 
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         Fragment[] fragments = new Fragment[]{
-                sMaDe = MaDeFragment.create(deThi.maDeThi),
-                sDapAn = DapAnFragment.create(deThi.dapAn, deThi.soCauPhan1, deThi.soCauPhan2, deThi.soCauPhan3 )
+                sMaDe = MaDeFragment.create(questionPaper.maDeThi),
+                sDapAn = DapAnFragment.create(questionPaper.dapAn, questionPaper.soCauPhan1, questionPaper.soCauPhan2, questionPaper.soCauPhan3 )
         };
 
         SSPAdapter adapter = new SSPAdapter(getSupportFragmentManager(), fragments);
@@ -99,10 +107,10 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        deThi.maDeThi = sMaDe.getMaDe();
-        deThi.dapAn = sDapAn.getListDapAn();
-
-        Utils.update(baiThi);
+        questionPaper.maDeThi = sMaDe.getMaDe();
+        questionPaper.dapAn = sDapAn.getListDapAn();
+        Utils.update(examination);
+        Log.d("MaDeActivity", "onBackPressed: " + questionPaper.maDeThi + ", " + questionPaper.dapAn);
     }
 
     @Override

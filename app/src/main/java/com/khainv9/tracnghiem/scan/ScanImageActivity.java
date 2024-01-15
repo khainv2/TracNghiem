@@ -1,36 +1,27 @@
 package com.khainv9.tracnghiem.scan;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.khainv9.tracnghiem.R;
 import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.models.BaiThi;
+import com.khainv9.tracnghiem.models.Examination;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -39,7 +30,7 @@ public class ScanImageActivity extends AppCompatActivity {
     private static final String TAG = "ScanImageActivity";
 
     Scanner scanner;
-    BaiThi baiThi;
+    Examination examination;
 
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -48,15 +39,12 @@ public class ScanImageActivity extends AppCompatActivity {
 
                 //lấy vị trí của bài thi trong intent gửi đến
                 int i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-                if (i >= 0 && i < Utils.dsBaiThi.size()){
-                    baiThi = Utils.dsBaiThi.get(i);
+                if (i >= 0 && i < Utils.dsExamination.size()){
+                    examination = Utils.dsExamination.get(i);
                 } else {
-                    baiThi = new BaiThi("abc", 17, 2, 2);
+                    examination = new Examination("abc", 17, 2, 2);
                 }
-                scanner = new Scanner(baiThi);
-//                String testImage = "/storage/emulated/0/Download/Bluetooth/IMG_20240113_003048.jpg";
-//                readImageFromPath(testImage);
-//
+                scanner = new Scanner(examination);
             } else {
                 super.onManagerConnected(status);
             }
