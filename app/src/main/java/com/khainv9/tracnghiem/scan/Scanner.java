@@ -7,7 +7,7 @@ import static java.lang.Math.sqrt;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.QuestionPaper;
 import com.khainv9.tracnghiem.models.ExamResult;
@@ -652,7 +652,7 @@ public class Scanner {
             }
         }
         String hsName = "";
-        for (Student student : Utils.dsStudent){
+        for (Student student : DatabaseManager.students){
             if (student.id.equals(studentId)){
                 hsName = " [ " + student.name + " ]";
                 break;
@@ -707,7 +707,7 @@ public class Scanner {
         String txtDeThi = "";
         if (examination != null){
             for (QuestionPaper dethi: examination.questionPapers){
-                if (dethi.maDeThi.equals(examCode)){
+                if (dethi.paperCode.equals(examCode)){
                     questionPaperFound = dethi;
                     break;
                 }
@@ -715,12 +715,12 @@ public class Scanner {
         }
         if (questionPaperFound != null){
             txtDeThi = examCode + " OK!";
-            Examination bai = Utils.getBaiThi(examination.id);
-            QuestionPaper de = Utils.getDethi(examination, examCode);
+            Examination bai = DatabaseManager.getExamination(examination.id);
+            QuestionPaper de = DatabaseManager.getQuestionPaper(examination, examCode);
             if (bai != null && de != null){
-                String[] dapAnP1 = de.getDapAnP1();
-                String[] dapAnP2 = de.getDapAnP2();
-                String[] dapAnP3 = de.getDapAnP3();
+                String[] dapAnP1 = de.chapterAAnswers();
+                String[] dapAnP2 = de.chapterBAnswers();
+                String[] dapAnP3 = de.chapterCAnswers();
                 String p1 = examPaper.chapter1Answer;
                 String p2 = examPaper.chapter2Answer;
                 String p3 = examPaper.chapter3Answer;
@@ -799,13 +799,10 @@ public class Scanner {
                         new String[] { examPaper.chapter1Answer, examPaper.chapter2Answer, examPaper.chapter3Answer },
                         false
                 );
-                ExamResult.Score score = examResult.chamBai();
+                ExamResult.Score score = examResult.calculateScore();
                 Imgproc.putText(whiteSquare, "Diem thi P1: " + score.p1 + ", P2: " + score.p2 + ", P3: " + score.p3 + ", Tong " + score.total(), new Point(40, 180), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
                 Imgproc.putText(whiteSquare, "Cham de luu ket qua", new Point(40, 240), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
 
-//                Imgproc.putText(whiteSquare, examPaper.chapter1Answer + " " + examPaper.chapter2Answer + " " + examPaper.chapter3Answer, new Point(40, 300), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-//                Imgproc.putText(whiteSquare, dapAnP1[0] + " " + dapAnP2[0] + " " + dapAnP3[0], new Point(40, 360), FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
-//
             }
         } else {
             txtDeThi = examCode + " [Sai ma de thi]!";
@@ -828,7 +825,7 @@ public class Scanner {
                     new String[] { examPaper.chapter1Answer, examPaper.chapter2Answer, examPaper.chapter3Answer },
                     true
             );
-            Utils.update(examResult);
+            DatabaseManager.update(examResult);
 
             result.info = "Đã lưu kết quả chấm";
 

@@ -2,6 +2,8 @@ package com.khainv9.tracnghiem.fragment;
 
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,10 +26,10 @@ public class DapAnFragment extends Fragment {
     public static final String ARG_S3 = "S3";
     ListDapAn listDapAn;
 
-    public static DapAnFragment create(String[] dapAn, int s1, int s2, int s3) {
+    public static DapAnFragment create(String[] answers, int s1, int s2, int s3) {
         DapAnFragment dapAnFragment = new DapAnFragment();
         Bundle arg = new Bundle();
-        if (dapAn != null) arg.putStringArray(ARG_DAP_AN, dapAn);
+        arg.putStringArray(ARG_DAP_AN, answers);
         arg.putInt(ARG_S1, s1);
         arg.putInt(ARG_S2, s2);
         arg.putInt(ARG_S3, s3);
@@ -38,7 +40,8 @@ public class DapAnFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.screen_dap_an, container, false);
-        String[] dapAn = getArguments().getStringArray(ARG_DAP_AN);
+        String[] answers = getArguments().getStringArray(ARG_DAP_AN);
+
         int s1 = getArguments().getInt(ARG_S1);
         int s2 = getArguments().getInt(ARG_S2);
         int s3 = getArguments().getInt(ARG_S3);
@@ -62,8 +65,8 @@ public class DapAnFragment extends Fragment {
             arrs.add(new String[] { "-", ",", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" });
         }
 
-        new ListNumber((ViewGroup) v.findViewById(R.id.ll1), numbers).create();
-        listDapAn = new ListDapAn((ViewGroup) v.findViewById(R.id.ll2), dapAn, arrs);
+        new ListNumber(v.findViewById(R.id.ll1), numbers).create();
+        listDapAn = new ListDapAn(v.findViewById(R.id.ll2), answers, arrs);
         listDapAn.create();
         return v;
     }

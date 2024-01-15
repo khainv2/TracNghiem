@@ -16,10 +16,6 @@
             android:id="@+id/nav_xem_diem"
             android:icon="@drawable/ic_error_black_24dp"
             android:title="Xem điểm" />
-        <item
-            android:id="@+id/nav_giay_thi"
-            android:icon="@drawable/ic_description_black_24dp"
-            android:title="Giấy thi" />
     </group>
 
     <item android:title="Communicate">

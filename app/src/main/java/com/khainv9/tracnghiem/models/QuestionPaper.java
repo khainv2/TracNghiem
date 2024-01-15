@@ -2,48 +2,50 @@ package com.khainv9.tracnghiem.models;
 
 import org.msgpack.annotation.Message;
 
-import java.util.Random;
+import java.util.Arrays;
+import java.util.List;
 
 
 @Message
 public class QuestionPaper {
     public static final String NOT = "_";
 
-    public String maDeThi;
-
-    public int soCauPhan1, soCauPhan2, soCauPhan3; // Mỗi câu ở phần 2 và 3 bao gồm 4 ý
-    public String[] dapAn;
+    public String paperCode;
+    public String[] answers;
+    public int chapterACount;
+    public int chapterBCount;
+    public int chapterCCount;
 
     public QuestionPaper() {
     }
 
-    public QuestionPaper(int soCauPhan1, int soCauPhan2, int soCauPhan3) {
-        this.maDeThi = "";
-
-        this.soCauPhan1 = soCauPhan1;
-        this.soCauPhan2 = soCauPhan2;
-        this.soCauPhan3 = soCauPhan3;
-
-        this.dapAn = new String[soCauPhan1 + (soCauPhan2 * 4) + (soCauPhan3 * 4)];
-
-        for (int i = 0; i < dapAn.length; i++) this.dapAn[i] = NOT;
+    public QuestionPaper(int chapterACount, int chapterBCount, int chapterCCount) {
+        this.paperCode = "";
+        this.chapterACount = chapterACount;
+        this.chapterBCount = chapterBCount;
+        this.chapterCCount = chapterCCount;
+        answers = new String[chapterACount + (chapterBCount * 4) + (chapterCCount * 4)];
+        Arrays.fill(answers, NOT);
     }
 
-    public String[] getDapAnP1(){
-        String[] dapAn = new String[soCauPhan1];
-        for (int i = 0; i < soCauPhan1; i++) dapAn[i] = this.dapAn[i];
-        return dapAn;
+
+    public String[] chapterAAnswers(){
+        String[] output = new String[chapterACount];
+        System.arraycopy(this.answers, 0, output, 0, chapterACount);
+        return output;
     }
 
-    public String[] getDapAnP2(){
-        String[] dapAn = new String[soCauPhan2 * 4];
-        for (int i = 0; i < soCauPhan2 * 4; i++) dapAn[i] = this.dapAn[soCauPhan1 + i];
-        return dapAn;
+    public String[] chapterBAnswers(){
+        String[] output = new String[chapterBCount * 4];
+        if (chapterBCount * 4 >= 0)
+            System.arraycopy(this.answers, chapterACount, output, 0, chapterBCount * 4);
+        return output;
     }
 
-    public String[] getDapAnP3(){
-        String[] dapAn = new String[soCauPhan3 * 4];
-        for (int i = 0; i < soCauPhan3 * 4; i++) dapAn[i] = this.dapAn[soCauPhan1 + soCauPhan2 * 4 + i];
-        return dapAn;
+    public String[] chapterCAnswers(){
+        String[] output = new String[chapterCCount * 4];
+        for (int i = 0; i < chapterCCount * 4; i++) output[i] = this.answers[chapterACount + chapterBCount * 4 + i];
+        return output;
     }
+
 }

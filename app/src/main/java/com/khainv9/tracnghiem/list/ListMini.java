@@ -37,7 +37,6 @@ public abstract class ListMini {
 
     public abstract int getNumber();
 
-    //like bindview
     public abstract void update(int i);
 
     public VH getMiniVH(int i) {

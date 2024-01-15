@@ -9,19 +9,19 @@ import android.widget.TextView;
 
 import com.khainv9.tracnghiem.DetailActivity;
 import com.khainv9.tracnghiem.R;
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 public class BaiThiAdapter extends RecyclerView.Adapter<BaiThiAdapter.BTVH> implements View.OnClickListener {
 
-    ArrayList<Examination> dsExamination;
+    List<Examination> dsExamination;
     View.OnLongClickListener onL;
 
-    public BaiThiAdapter(ArrayList<Examination> dsExamination, View.OnLongClickListener onL) {
+    public BaiThiAdapter(List<Examination> dsExamination, View.OnLongClickListener onL) {
         this.dsExamination = dsExamination;
         this.onL = onL;
     }
@@ -36,9 +36,9 @@ public class BaiThiAdapter extends RecyclerView.Adapter<BaiThiAdapter.BTVH> impl
         Examination examination = dsExamination.get(position);
         holder.ten.setText(examination.name);
 
-        holder.ngay.setText(Utils.dateString(new Date(examination.createdTime)));
+        holder.ngay.setText(DatabaseManager.dateString(new Date(examination.createdTime)));
         holder.soCau.setText("Số câu: " + examination.chapterACount + "/" + examination.chapterBCount + "/" + examination.chapterCCount);
-        holder.item.setId(position);
+        holder.item.setId(examination.id);
         holder.item.setOnClickListener(this);
         if (onL != null) holder.item.setOnLongClickListener(onL);
     }
@@ -48,7 +48,7 @@ public class BaiThiAdapter extends RecyclerView.Adapter<BaiThiAdapter.BTVH> impl
         int position = v.getId();
         v.getContext().startActivity(
                 new Intent(v.getContext(), DetailActivity.class)
-                        .putExtra(Utils.ARG_P_BAI_THI, position)
+                        .putExtra(DatabaseManager.ARG_P_BAI_THI, position)
         );
     }
 

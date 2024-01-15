@@ -1,5 +1,6 @@
 package com.khainv9.tracnghiem;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,7 +24,7 @@ import android.widget.Toast;
 import com.khainv9.tracnghiem.adapter.BaiThiAdapter;
 import com.khainv9.tracnghiem.adapter.DiemThiAdapter;
 import com.khainv9.tracnghiem.adapter.HocSinhAdapter;
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.Student;
 
@@ -35,17 +36,17 @@ public class MainActivity extends AppCompatActivity
     FloatingActionButton fab;
     NavigationView navigationView;
     AlertDialog taoBaiThi, themHocSinh;
+    Toolbar toolbar;
     int idSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Chấm trắc nghiệm");
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Bài thi");
         setSupportActionBar(toolbar);
 
-        //init
         rv = findViewById(R.id.rv);
         rv.setLayoutManager(new LinearLayoutManager(this));
         fab = findViewById(R.id.fab);
@@ -65,7 +66,6 @@ public class MainActivity extends AppCompatActivity
         createWindowThemHocSinh();
     }
 
-
     private void createWindowSuaBaiThi(final Examination examination) {
         View v = getLayoutInflater().inflate(R.layout.screen_bai_moi, null);
         final EditText tvTenBai = v.findViewById(R.id.ed_bai),
@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity
                 edPhan2 = v.findViewById(R.id.ed_p2),
                 edPhan3 = v.findViewById(R.id.ed_p3),
                 edTotal = v.findViewById(R.id.ed_number_total);
+        edPhan1.setText(examination.chapterACount + "");
+        edPhan2.setText(examination.chapterBCount + "");
+        edPhan3.setText(examination.chapterCCount + "");
         syncDiemBaiThi(edPhan1, edPhan2, edPhan3, edTotal);
         tvTenBai.setText(examination.name);
         new AlertDialog.Builder(this)
@@ -91,11 +94,11 @@ public class MainActivity extends AppCompatActivity
                     examination.chapterACount = p1;
                     examination.chapterBCount = p2;
                     examination.chapterCCount = p3;
-                    Utils.update(examination);
+                    DatabaseManager.update(examination);
                     adapter.notifyDataSetChanged();
                 })
                 .setNegativeButton("Xóa", (dialog, which) -> {
-                    Utils.delete(examination);
+                    DatabaseManager.delete(examination);
                     adapter.notifyDataSetChanged();
                 })
                 .create().show();
@@ -127,11 +130,11 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, "SBD không được để trống", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Utils.update(student);
+                    DatabaseManager.update(student);
                     adapter.notifyDataSetChanged();
                 })
                 .setNegativeButton("Xóa", (dialog, which) -> {
-                    Utils.delete(student);
+                    DatabaseManager.delete(student);
                     adapter.notifyDataSetChanged();
                 })
                 .create().show();
@@ -161,7 +164,7 @@ public class MainActivity extends AppCompatActivity
                             return;
                         }
                         Student student = new Student(sbd, tenHS, lop);
-                        Utils.update(student);
+                        DatabaseManager.update(student);
                         adapter.notifyDataSetChanged();
                     }
                 })
@@ -266,7 +269,7 @@ public class MainActivity extends AppCompatActivity
                         int p3 = Integer.parseInt(edPhan3.getText().toString());
                         String sTen = tvTenBai.getText().toString();
                         Examination examination = new Examination(sTen, p1, p2, p3);
-                        Utils.update(examination);
+                        DatabaseManager.update(examination);
                         adapter.notifyDataSetChanged();
                     }
                 })
@@ -300,16 +303,14 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_detete) {
             switch (idSelected) {
                 case R.id.nav_bai_thi:
-                    Utils.deleteAllBT();
+                    DatabaseManager.deleteAllExaminations();
                     adapter.notifyDataSetChanged();
                     break;
                 case R.id.nav_hoc_sinh:
-                    Utils.deleteAllHS();
+                    DatabaseManager.deleteAllStudents();
                     adapter.notifyDataSetChanged();
                     break;
                 case R.id.nav_xem_diem:
-                    break;
-                case R.id.nav_giay_thi:
                     break;
                 case R.id.nav_send:
                     break;
@@ -322,6 +323,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         idSelected = item.getItemId();
@@ -332,26 +334,25 @@ public class MainActivity extends AppCompatActivity
         }
         switch (idSelected) {
             case R.id.nav_bai_thi:
-                adapter = new BaiThiAdapter(Utils.dsExamination, v -> {
-                    createWindowSuaBaiThi(Utils.dsExamination.get(v.getId()));
+                adapter = new BaiThiAdapter(DatabaseManager.getExaminations(), v -> {
+                    createWindowSuaBaiThi(DatabaseManager.getExamination(v.getId()));
                     return true;
                 });
                 rv.setAdapter(adapter);
+                toolbar.setTitle("Bài thi");
                 break;
             case R.id.nav_hoc_sinh:
-                adapter = new HocSinhAdapter(Utils.dsStudent, v -> {
-                    createWindowSuaHocSinh(Utils.dsStudent.get(v.getId()));
+                adapter = new HocSinhAdapter(DatabaseManager.students, v -> {
+                    createWindowSuaHocSinh(DatabaseManager.students.get(v.getId()));
                     return true;
                 });
                 rv.setAdapter(adapter);
+                toolbar.setTitle("Học sinh");
                 break;
             case R.id.nav_xem_diem:
-                adapter = new DiemThiAdapter(Utils.dsExamResult);
+                adapter = new DiemThiAdapter(DatabaseManager.examResults);
                 rv.setAdapter(adapter);
-                break;
-            case R.id.nav_giay_thi:
-//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://tnmaker.wordpress.com/"));
-//                startActivity(browserIntent);
+                toolbar.setTitle("Xem điểm");
                 break;
             case R.id.nav_send:
                 break;

@@ -12,7 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.fragment.DapAnFragment;
 import com.khainv9.tracnghiem.fragment.MaDeFragment;
 import com.khainv9.tracnghiem.fragment.SSPAdapter;
@@ -45,27 +45,25 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
         getSupportActionBar().setTitle("Mã đề");
 
         //lấy vị trí của bài thi trong intent gửi đến
-        iBT = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-        examination = Utils.dsExamination.get(iBT);
+        iBT = getIntent().getIntExtra(DatabaseManager.ARG_P_BAI_THI, 0);
+        examination = DatabaseManager.getExamination(iBT);
         if (examination == null){
-            Log.e("MaDeActivity", "onCreate: baiThi null");
             finish();
-        } else {
-            Log.d("MaDeActivity", "onCreate: baiThi " + examination.questionPapers.size());
+            return;
         }
+        Log.d("MaDeActivity", "onCreate: " + examination.questionPapers.size() + ", " + iBT);
+        Log.d("MaDeActivity", "onCreate: " + examination.questionPapers.get(0).paperCode);
+//        for (int i = 0; i < DatabaseManager.examinations.size(); i++){
+//            Log.d("MaDeActivity", "onCreate: ------" + DatabaseManager.examinations.get(i).questionPapers.get(0).paperCode);
+//        }
 
-        iDT = getIntent().getIntExtra(Utils.ARG_P_DE_THI, THEM_MOI);
+        iDT = getIntent().getIntExtra(DatabaseManager.ARG_P_DE_THI, THEM_MOI);
         if (iDT == THEM_MOI) {
             iDT = examination.questionPapers.size();
             questionPaper = new QuestionPaper(examination.chapterACount, examination.chapterBCount, examination.chapterCCount);
             examination.questionPapers.add(questionPaper);
         } else {
             questionPaper = examination.questionPapers.get(iDT);
-        }
-
-        Log.d("MaDeActivity", "onCreate: iBT = " + iBT + ", iDT = " + iDT + ", deThi " + questionPaper);
-        for (int i = 0; i < examination.questionPapers.size(); i++) {
-            Log.d("MaDeActivity", "onCreate: " + examination.questionPapers.get(i));
         }
 
         viewPager = findViewById(R.id.vp);
@@ -75,8 +73,8 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
 
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         Fragment[] fragments = new Fragment[]{
-                sMaDe = MaDeFragment.create(questionPaper.maDeThi),
-                sDapAn = DapAnFragment.create(questionPaper.dapAn, questionPaper.soCauPhan1, questionPaper.soCauPhan2, questionPaper.soCauPhan3 )
+                sMaDe = MaDeFragment.create(questionPaper.paperCode),
+                sDapAn = DapAnFragment.create(questionPaper.answers, questionPaper.chapterACount, questionPaper.chapterBCount, questionPaper.chapterCCount )
         };
 
         SSPAdapter adapter = new SSPAdapter(getSupportFragmentManager(), fragments);
@@ -107,10 +105,10 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        questionPaper.maDeThi = sMaDe.getMaDe();
-        questionPaper.dapAn = sDapAn.getListDapAn();
-        Utils.update(examination);
-        Log.d("MaDeActivity", "onBackPressed: " + questionPaper.maDeThi + ", " + questionPaper.dapAn);
+        questionPaper.paperCode = sMaDe.getMaDe();
+        questionPaper.answers = sDapAn.getListDapAn();
+        DatabaseManager.update(examination);
+        Log.d("MaDeActivity", "onBackPressed: " + questionPaper.paperCode + ", " + questionPaper.answers);
     }
 
     @Override

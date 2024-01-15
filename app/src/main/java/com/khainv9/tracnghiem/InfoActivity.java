@@ -9,7 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.khainv9.tracnghiem.adapter.DiemThiAdapter;
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.ExamResult;
 
@@ -33,16 +33,16 @@ public class InfoActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Xem lại");
 
         //lấy vị trí của bài thi trong intent gửi đến
-        i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-        examination = Utils.dsExamination.get(i);
+        i = getIntent().getIntExtra(DatabaseManager.ARG_P_BAI_THI, 0);
+        examination = DatabaseManager.getExamination(i);
         //init
         rv = findViewById(R.id.rv);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
         ArrayList<ExamResult> list = new ArrayList<>();
-        for (int j = 0; j < Utils.dsExamResult.size(); j++) {
-            ExamResult examResult = Utils.dsExamResult.get(j);
-            if (examResult.maBaiThi == examination.id) list.add(examResult);
+        for (int j = 0; j < DatabaseManager.examResults.size(); j++) {
+            ExamResult examResult = DatabaseManager.examResults.get(j);
+            if (examResult.examinationId == examination.id) list.add(examResult);
         }
         rv.setAdapter(diemThiAdapter = new DiemThiAdapter(list));
     }

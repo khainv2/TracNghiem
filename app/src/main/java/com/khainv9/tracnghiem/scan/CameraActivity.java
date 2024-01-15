@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 import com.khainv9.tracnghiem.R;
 
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -65,11 +65,11 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         mOpenCvCameraView.setCvCameraViewListener(this);
 
         //lấy vị trí của bài thi trong intent gửi đến
-        int i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-        if (i >= 0 && i < Utils.dsExamination.size()){
-            examination = Utils.dsExamination.get(i);
-        } else {
-            examination = new Examination("abc", 17, 2, 2);
+        int examId = getIntent().getIntExtra(DatabaseManager.ARG_P_BAI_THI, 0);
+        examination = DatabaseManager.getExamination(examId);
+        if (examination == null){
+            finish();
+            return;
         }
         scanner = new Scanner(examination);
 

@@ -11,7 +11,7 @@ import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.ImageActivity;
 
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.ExamResult;
 
@@ -35,12 +35,12 @@ public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
     @Override
     public void onBindViewHolder(DTVH holder, int position) {
         ExamResult d = ds.get(position);
-        holder.tenTs.setText(Utils.getHocSinh(d.sbd).name);
-        holder.sbd.setText("SBD: " + d.sbd);
-        Examination examination = Utils.getBaiThi(d.maBaiThi);
+        holder.tenTs.setText(DatabaseManager.getHocSinh(d.studentId).name);
+        holder.sbd.setText("SBD: " + d.studentId);
+        Examination examination = DatabaseManager.getExamination(d.examinationId);
         holder.tenBaiThi.setText(examination.name);
-        holder.maDe.setText(d.maDeThi);
-        holder.soDiem.setText(String.format("%.2f điểm", d.diemSo, 93));
+        holder.maDe.setText(d.questionPaperCode);
+        holder.soDiem.setText(String.format("%.2f điểm", d.score, 93));
 
         holder.item.setId(position);
         holder.item.setOnLongClickListener(this);
@@ -62,7 +62,7 @@ public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
     @Override
     public boolean onLongClick(View v) {
         int position = v.getId();
-        Utils.delete(ds.get(position));
+        DatabaseManager.delete(ds.get(position));
         notifyDataSetChanged();
         return true;
     }

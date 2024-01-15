@@ -2,8 +2,6 @@ package com.khainv9.tracnghiem.models;
 
 import org.msgpack.annotation.Message;
 
-
-
 @Message
 public class Student {
     public String id;

@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.ExamResult;
 
 
@@ -71,7 +71,7 @@ public class ImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image);
 
         int i = getIntent().getIntExtra("i", 0);
-        ExamResult examResult = Utils.dsExamResult.get(i);
+        ExamResult examResult = DatabaseManager.examResults.get(i);
 
         ImageView imageView = (ImageView) findViewById(R.id.imageFullScreen);
 
@@ -85,7 +85,7 @@ public class ImageActivity extends AppCompatActivity {
         }
 
         Button bt = (Button) findViewById(R.id.dummy_button);
-        bt.setText(Utils.getBaiThi(examResult.maBaiThi).name);
+        bt.setText(DatabaseManager.getExamination(examResult.examinationId).name);
 
         bt.setOnClickListener(new View.OnClickListener() {
             @Override

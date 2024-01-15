@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.khainv9.tracnghiem.adapter.DeThiAdapter;
-import com.khainv9.tracnghiem.app.Utils;
+import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
 
 public class DeThiActivity extends AppCompatActivity {
@@ -20,7 +20,7 @@ public class DeThiActivity extends AppCompatActivity {
     RecyclerView rv;
 
     DeThiAdapter deThiAdapter;
-    int i;
+    int examId;
     Toolbar toolbar;
     Examination examination;
 
@@ -35,19 +35,19 @@ public class DeThiActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Đề thi");
 
         //lấy vị trí của bài thi trong intent gửi đến
-        i = getIntent().getIntExtra(Utils.ARG_P_BAI_THI, 0);
-        examination = Utils.dsExamination.get(i);
+        examId = getIntent().getIntExtra(DatabaseManager.ARG_P_BAI_THI, 0);
+        examination = DatabaseManager.getExamination(examId);
 
         //init
         rv = findViewById(R.id.rv);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(deThiAdapter = new DeThiAdapter(i));
+        rv.setAdapter(deThiAdapter = new DeThiAdapter(examId));
 
         fab = findViewById(R.id.fab);
         fab.setOnClickListener(v -> startActivity(
                 new Intent(v.getContext(), MaDeActivity.class)
-                        .putExtra(Utils.ARG_P_BAI_THI, i)
-                        .putExtra(Utils.ARG_P_DE_THI, MaDeActivity.THEM_MOI)
+                        .putExtra(DatabaseManager.ARG_P_BAI_THI, examId)
+                        .putExtra(DatabaseManager.ARG_P_DE_THI, MaDeActivity.THEM_MOI)
         ));
     }
 

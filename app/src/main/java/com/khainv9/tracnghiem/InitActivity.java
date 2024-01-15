@@ -9,50 +9,40 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.khainv9.tracnghiem.app.Utils;
-import com.khainv9.tracnghiem.scan.CameraActivity;
-
 public class InitActivity extends AppCompatActivity {
 
     final int CAMERA_PERMISSION = 0;
-    boolean CAMERA_PERMISSION_GRANT;
+    boolean isPermissionGrant;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
         // Yêu cầu quyền truy cập trên Android 6.0 trở lên
-        CAMERA_PERMISSION_GRANT = checkIfAlreadyHavePermission();
-        if (!CAMERA_PERMISSION_GRANT)
+        isPermissionGrant = checkIfAlreadyHavePermission();
+        if (!isPermissionGrant)
             requestPermissions();
         startCamera();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case CAMERA_PERMISSION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    CAMERA_PERMISSION_GRANT = true;
-                startCamera();
-                return;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-                break;
+        if (requestCode == CAMERA_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                isPermissionGrant = true;
+            startCamera();
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
     private boolean checkIfAlreadyHavePermission() {
         int result = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
-        }
+        return result == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestPermissions() {
-        CAMERA_PERMISSION_GRANT = false;
+        isPermissionGrant = false;
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.CAMERA,
                         Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -61,7 +51,7 @@ public class InitActivity extends AppCompatActivity {
     }
 
     private void startCamera() {
-        if (CAMERA_PERMISSION_GRANT) {
+        if (isPermissionGrant) {
             startActivity(new Intent(this, MainActivity.class));
         }
     }
