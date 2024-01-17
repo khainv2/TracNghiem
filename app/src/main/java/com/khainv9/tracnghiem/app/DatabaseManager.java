@@ -27,7 +27,7 @@ public class DatabaseManager {
 
     private static ArrayList<Examination> examinations;
     public static ArrayList<Student> students;
-    public static ArrayList<ExamResult> examResults;
+    private static ArrayList<ExamResult> examResults;
 
     private static StoreManager storeManager;
 
@@ -51,6 +51,15 @@ public class DatabaseManager {
                 }
             }
         }
+    }
+
+    public static List<ExamResult> getExamResults() {
+        return examResults;
+    }
+
+    public static ExamResult getExamResultById(int id) {
+        for (ExamResult examResult : examResults) if (examResult.id == id) return examResult;
+        return null;
     }
 
     public static String dateString(Date date) {
@@ -160,9 +169,14 @@ public class DatabaseManager {
         return examinations;
     }
 
-    public static QuestionPaper getQuestionPaper(Examination examination, String maDeThi) {
-        for (int i = 0; i < examination.questionPapers.size(); i++)
-            if (examination.questionPapers.get(i).paperCode.equals(maDeThi)) return examination.questionPapers.get(i);
+    public static QuestionPaper getQuestionPaper(Examination examination, String paperCode) {
+        for (int i = 0; i < examination.questionPapers.size(); i++) {
+            QuestionPaper qp = examination.questionPapers.get(i);
+            if (qp == null || qp.paperCode == null)
+                continue;
+            if (qp.paperCode.equals(paperCode))
+                return examination.questionPapers.get(i);
+        }
         return null;
     }
 
@@ -178,8 +192,8 @@ public class DatabaseManager {
         storeManager.delete(HOC_SINH, student.id);
     }
 
-    public static Student getHocSinh(String sbd) {
-        for (Student baithi : students) if (baithi.id.equals(sbd)) return baithi;
-        return students.get(0);
+    public static Student getStudentById(String id) {
+        for (Student student : students) if (student.id.equals(id)) return student;
+        return null;
     }
 }

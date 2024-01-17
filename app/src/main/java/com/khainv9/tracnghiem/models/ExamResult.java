@@ -1,6 +1,7 @@
 package com.khainv9.tracnghiem.models;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.khainv9.tracnghiem.app.DatabaseManager;
 
@@ -28,8 +29,10 @@ public class ExamResult {
     public String[] responses;
     public double score;
 
+    public ExamResult(){}
     public ExamResult(String studentId, int examinationId, String questionPaperCode, Bitmap anhBaiThi, String[] responses, boolean isSaveImage) {
-        this.id = new Random().nextInt();
+        long createdTime = System.currentTimeMillis();
+        this.id = (int) (createdTime / 1000);
         this.studentId = studentId;
         this.examinationId = examinationId;
         this.questionPaperCode = questionPaperCode;
@@ -41,9 +44,15 @@ public class ExamResult {
 
     public Score calculateScore() {
         Examination examination = DatabaseManager.getExamination(examinationId);
-        QuestionPaper questionPaper = DatabaseManager.getQuestionPaper(examination, questionPaperCode);
-        if (questionPaper == null)
+        if (examination == null) {
+            Log.e("MyLog", "Khong tim thay bai thi");
             return new Score();
+        }
+        QuestionPaper questionPaper = DatabaseManager.getQuestionPaper(examination, questionPaperCode);
+        if (questionPaper == null) {
+            Log.e("MyLog", "Khong tim thay ma de " + questionPaperCode + " trong bai thi " + examination.name);
+            return new Score();
+        }
         String[] p1Answers = questionPaper.chapterAAnswers();
         String[] p2Answers = questionPaper.chapterBAnswers();
         String[] p3Answers = questionPaper.chapterCAnswers();
@@ -89,7 +98,7 @@ public class ExamResult {
         for (int i = 0; i < p3Answers.length && i < p3.length(); i++){
             String actual = p3.charAt(i) + "";
             String expected = p3Answers[i];
-            if (expected.equals(actual)){
+            if (expected.equals(actual) || expected.equals("_")){
                 count++;
             }
             if (i % 4 == 3){
@@ -100,9 +109,9 @@ public class ExamResult {
             }
         }
 
-//        String dapAnAll = "";
-//        for (int i = 0; i < questionPaper.answers.length; i++) dapAnAll += questionPaper.answers[i];
-//        Log.d("MyLog", "Start cham bai, bai lam: " + p1 + p2 + p3 + ", dap an" + dapAnAll +" , diem so hien tai: " + diemP1 + " " + diemP2 + " " + diemP3);
+        String dapAnAll = "";
+        for (int i = 0; i < questionPaper.answers.length; i++) dapAnAll += questionPaper.answers[i];
+        Log.d("MyLog", "Start cham bai, bai lam: " + p1 + p2 + p3 + ", dap an" + dapAnAll +" , diem so hien tai: " + diemP1 + " " + diemP2 + " " + diemP3);
 
         Score scoreSo = new Score();
         scoreSo.p1 = diemP1;

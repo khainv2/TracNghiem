@@ -68,7 +68,7 @@ public class MaDeFragment extends Fragment {
         for (int i = 0; i < lsNumbrer.length; i++) {
             a += lsNumbrer[i].getSelected();
         }
-        if (a.contains("-1")) return null;
+        if (a.contains("-1")) return "";
         return a;
     }
 }

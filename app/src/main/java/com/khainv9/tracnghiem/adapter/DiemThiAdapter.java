@@ -14,17 +14,24 @@ import com.khainv9.tracnghiem.ImageActivity;
 import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.ExamResult;
+import com.khainv9.tracnghiem.models.Student;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
         implements View.OnClickListener, View.OnLongClickListener {
 
-    ArrayList<ExamResult> ds;
+    List<ExamResult> ds;
 
-    public DiemThiAdapter(ArrayList<ExamResult> dsExamResult) {
+    public DiemThiAdapter(List<ExamResult> dsExamResult) {
         ds = dsExamResult;
+    }
+
+    public void updateList(List<ExamResult> dsExamResult){
+        ds = dsExamResult;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -35,7 +42,12 @@ public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
     @Override
     public void onBindViewHolder(DTVH holder, int position) {
         ExamResult d = ds.get(position);
-        holder.tenTs.setText(DatabaseManager.getHocSinh(d.studentId).name);
+        Student st = DatabaseManager.getStudentById(d.studentId);
+        if (st == null){
+            holder.tenTs.setText("Không rõ");
+        } else {
+            holder.tenTs.setText(st.name);
+        }
         holder.sbd.setText("SBD: " + d.studentId);
         Examination examination = DatabaseManager.getExamination(d.examinationId);
         holder.tenBaiThi.setText(examination.name);
@@ -50,8 +62,9 @@ public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
     @Override
     public void onClick(View v) {
         int position = v.getId();
+        int id = ds.get(position).id;
         v.getContext().startActivity(new Intent(v.getContext(), ImageActivity.class)
-                        .putExtra("i", position));
+                        .putExtra("i", id));
     }
 
     @Override

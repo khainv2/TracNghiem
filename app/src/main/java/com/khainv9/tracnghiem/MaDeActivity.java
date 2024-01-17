@@ -51,8 +51,6 @@ public class MaDeActivity extends AppCompatActivity implements View.OnClickListe
             finish();
             return;
         }
-        Log.d("MaDeActivity", "onCreate: " + examination.questionPapers.size() + ", " + iBT);
-        Log.d("MaDeActivity", "onCreate: " + examination.questionPapers.get(0).paperCode);
 //        for (int i = 0; i < DatabaseManager.examinations.size(); i++){
 //            Log.d("MaDeActivity", "onCreate: ------" + DatabaseManager.examinations.get(i).questionPapers.get(0).paperCode);
 //        }

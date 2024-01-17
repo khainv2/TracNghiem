@@ -71,7 +71,7 @@ public class ImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image);
 
         int i = getIntent().getIntExtra("i", 0);
-        ExamResult examResult = DatabaseManager.examResults.get(i);
+        ExamResult examResult = DatabaseManager.getExamResultById(i);
 
         ImageView imageView = (ImageView) findViewById(R.id.imageFullScreen);
 
@@ -117,6 +117,7 @@ public class ImageActivity extends AppCompatActivity {
     }
 
     private void toggle() {
+        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
         if (mVisible) {
             hide();
         } else {

@@ -15,6 +15,7 @@ import com.khainv9.tracnghiem.R;
 
 import com.khainv9.tracnghiem.app.DatabaseManager;
 import com.khainv9.tracnghiem.models.Examination;
+import com.khainv9.tracnghiem.scan.algorithm.BitmapUtil;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -40,7 +41,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
                 // Load image from R.drawable.test to bitmap
                 Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.test);
-                test = Scanner.bitmapToMat(bmp);
+                test = BitmapUtil.bitmapToMat(bmp);
             } else {
                 super.onManagerConnected(status);
             }

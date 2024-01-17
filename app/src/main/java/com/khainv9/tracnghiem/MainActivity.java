@@ -350,7 +350,7 @@ public class MainActivity extends AppCompatActivity
                 toolbar.setTitle("Học sinh");
                 break;
             case R.id.nav_xem_diem:
-                adapter = new DiemThiAdapter(DatabaseManager.examResults);
+                adapter = new DiemThiAdapter(DatabaseManager.getExamResults());
                 rv.setAdapter(adapter);
                 toolbar.setTitle("Xem điểm");
                 break;

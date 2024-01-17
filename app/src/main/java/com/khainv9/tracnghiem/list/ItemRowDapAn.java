@@ -48,9 +48,16 @@ public class ItemRowDapAn extends ListMini implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        // Cho phép hủy chọn đáp án
         int oldSelected = selected;
-        update(selected = v.getId());
-        update(oldSelected);
+        if (selected == v.getId()) {
+            selected = -1;
+            update(oldSelected);
+        } else {
+            selected = v.getId();
+            update(selected);
+            update(oldSelected);
+        }
     }
 
     public String getDapAn() {

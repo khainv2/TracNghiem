@@ -1,10 +1,5 @@
 package com.khainv9.tracnghiem.scan;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.acos;
-import static java.lang.Math.sqrt;
-
-import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.khainv9.tracnghiem.app.DatabaseManager;
@@ -12,9 +7,11 @@ import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.QuestionPaper;
 import com.khainv9.tracnghiem.models.ExamResult;
 import com.khainv9.tracnghiem.models.Student;
+import com.khainv9.tracnghiem.scan.algorithm.BitmapUtil;
+import com.khainv9.tracnghiem.scan.algorithm.GeometryUtil;
+import com.khainv9.tracnghiem.scan.algorithm.Grid;
 
 import org.opencv.core.Core;
-import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -26,53 +23,34 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Scanner {
-    Mat[] corners;
-    Mat[] corners1;
+    static class ProcessResult {
+        Mat resultMat;
+        String info = "";
+    }
 
-    Mat testMat;
-    Mat testMat2;
+    Mat[] corners;
 
     int myHeight;
     int myWidth;
 
-    //hình chữ nhật
     Rect[] rects;
 
-    //kích thước thử nghiệm (giấy thi, pixel)
-    //kích thước cắt bởi 4 góc dấu chấm đen
     Template template;
 
-    Mat src, bgrFrame, bilateralImage, denoisedImage, hsvImage, frameThreshed, imgray;
-    Mat dst;
-
-    List<Line> vLines = new ArrayList<>();
-    List<Line> hLines = new ArrayList<>();
+    Grid grid = new Grid();
     ExamPaper examPaper = new ExamPaper();
 
     boolean touch = false;
 
+    Mat whiteSquare, grayImage, binaryImage, edges, hierarchy;
+
     Examination examination;
     Scanner(Examination examination){
         this.examination = examination;
-    }
-
-    void calculateVHLines(Point tl, Point tr, Point br, Point bl){
-        Point pCenter = GeometryUtils.calculateIntersection(tl, br, tr, bl);
-        Point pFar1 = GeometryUtils.calculateIntersection(tl, bl, tr, br);
-        Point pFar2 = GeometryUtils.calculateIntersection(tl, tr, br, bl);
-        vLines = GeometryUtils.findMidPoints(tl, tr, br, bl, pCenter, pFar1, 10);
-        hLines = GeometryUtils.findMidPoints(tl, bl, br, tr, pCenter, pFar2, 10);
-        Collections.sort(vLines, (o1, o2) -> Double.compare(o1.p1.x, o2.p1.x));
-        Collections.sort(hLines, (o1, o2) -> Double.compare(o1.p1.y, o2.p1.y));
-    }
-
-    Point getRefPoint(double x, double y){
-        Line vLine1 = vLines.get((int) (x * vLines.size()));
-        Line hLine1 = hLines.get((int) (y * hLines.size()));
-        return GeometryUtils.calculateIntersection(vLine1.p1, vLine1.p2, hLine1.p1, hLine1.p2);
     }
 
     void init(int width, int height){
@@ -82,151 +60,20 @@ public class Scanner {
         int heightCal = this.myHeight / 4;
         int widthCal = (this.myHeight * 9) / 8;
         this.corners = new Mat[4];
-        this.corners1 = new Mat[4];
         this.rects = new Rect[4];
         this.rects[0] = new Rect(0, 0, heightCal, heightCal);
         this.rects[1] = new Rect(widthCal, 0, heightCal, heightCal);
         this.rects[2] = new Rect(0, this.myHeight - heightCal, heightCal, heightCal);
         this.rects[3] = new Rect(widthCal, this.myHeight - heightCal, heightCal, heightCal);
 
+        whiteSquare = new Mat(myHeight, myHeight, CvType.CV_8UC4, new Scalar(255, 255, 255));
+        grayImage = new Mat();
+        binaryImage = new Mat();
+        edges = new Mat();
+        hierarchy = new Mat();
 
         template = Template.createDefaultTemplate();
-
-
-        src = new Mat(height, width, CvType.CV_8UC3);
-
-        bgrFrame = new Mat();
-        bilateralImage = new Mat();
-        denoisedImage = new Mat();
-        hsvImage = new Mat();
-        frameThreshed = new Mat();
-        imgray = new Mat();
-        dst = new Mat();
     }
-
-    private static List<Point> verifyTopPoint(List<Point> points, int limit, int step, boolean isTop){
-        int s = points.size();
-        while (s > limit) s -= step;
-        s += step;
-
-        // Sắp xếp danh sách theo thứ tự giá trị y tăng dần
-        if (isTop){
-            Collections.sort(points, (o1, o2) -> Double.compare(o1.y, o2.y));
-        } else {
-            Collections.sort(points, (o1, o2) -> Double.compare(o2.y, o1.y));
-        }
-
-//        Log.d("MyLog", "verify top with " + s + " points");
-        for (int i = s; i <= points.size(); i+= step){
-            // Lấy danh sách s điểm trong danh sách
-            List<Point> subPoints = new ArrayList<>();
-            for (int j = 0; j < i; j++){
-                subPoints.add(points.get(j));
-            }
-            while (subPoints.size() > limit){
-                subPoints.remove(findOutlier(subPoints));
-            }
-
-            double[] lineParams = findSlopeAndIntercept(subPoints);
-            double avrDistance = 0;
-            for (Point point : subPoints) {
-                double distance = Math.abs(point.y - (lineParams[0] * point.x + lineParams[1]));
-                avrDistance += distance;
-            }
-            avrDistance /= subPoints.size();
-
-//            Log.d("MyLog", "verify top with " + i + " points, avrDistance = " + avrDistance + ", is top " + isTop);
-
-            if (avrDistance < step){
-                return subPoints;
-            }
-        }
-
-//        Log.d("MyLog", "verify top failed");
-        List<Point> output = new ArrayList<>();
-        return output;
-    }
-
-
-    private static double[] findSlopeAndIntercept(List<Point> points){
-        double[] lineParams = new double[2];
-        double sumX = 0;
-        double sumY = 0;
-        double sumXY = 0;
-        double sumX2 = 0;
-        for (Point point : points){
-            sumX += point.x;
-            sumY += point.y;
-            sumXY += point.x * point.y;
-            sumX2 += point.x * point.x;
-        }
-        double n = points.size();
-        double slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-        double intercept = (sumY - slope * sumX) / n;
-        lineParams[0] = slope;
-        lineParams[1] = intercept;
-        return lineParams;
-    }
-
-    private static void sort(List<Integer> values){
-        for (int i = 0; i < values.size(); i++){
-            for (int j = i + 1; j < values.size(); j++){
-                if (values.get(i) > values.get(j)){
-                    int temp = values.get(i);
-                    values.set(i, values.get(j));
-                    values.set(j, temp);
-                }
-            }
-        }
-    }
-
-    private static int findOutlier(List<Point> points) {
-        // Tìm hệ số góc và sai số của đường thẳng tốt nhất (best-fit line)
-        double[] lineParams = findSlopeAndIntercept(points);
-
-        // Tính khoảng cách từ mỗi điểm đến đường thẳng
-        List<Double> distances = new ArrayList<>();
-        for (Point point : points) {
-            double distance = Math.abs(point.y - (lineParams[0] * point.x + lineParams[1]));
-            distances.add(distance);
-        }
-
-        // Tìm điểm có khoảng cách lớn nhất (nằm xa đường thẳng)
-        int outlierIndex = 0;
-        double maxDistance = -1;
-        for (int i = 0; i < distances.size(); i++) {
-            if (distances.get(i) > maxDistance) {
-                maxDistance = distances.get(i);
-                outlierIndex = i;
-            }
-        }
-        return outlierIndex;
-    }
-
-    private static double distance(Point p1, Point p2){
-        return sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-    }
-
-    static double lengthSquare(Point p1, Point p2) {
-        double xDiff = p1.x- p2.x;
-        double yDiff = p1.y- p2.y;
-        return xDiff*xDiff + yDiff*yDiff;
-    }
-    static double calculateAngle(Point A, Point B, Point C) {
-        // Square of lengths be a2, b2, c2
-        double a2 = lengthSquare(B, C);
-        double b2 = lengthSquare(A, C);
-        double c2 = lengthSquare(A, B);
-        // length of sides be a, b, c
-        double a = sqrt(a2);
-//        double b = sqrt(b2);
-        double c = sqrt(b2);
-        // From Cosine law
-        double gamma = acos((a2 + c2 - b2)/(2*a*c));
-        // Converting to degree
-        return gamma * 180 / PI;
-    }
-
 
     void putBottomInfo(Mat inputFrame, Mat whiteSquare, Point cornerBR){
         Core.rotate(whiteSquare, whiteSquare, Core.ROTATE_90_COUNTERCLOCKWISE);
@@ -236,33 +83,30 @@ public class Scanner {
         r1.copyTo(inputRoi);
     }
 
-    static class ProcessResult {
-        Mat resultMat;
-        String info = "";
-    }
 
     public ProcessResult processFrame(Mat inputFrame) {
         examPaper = new ExamPaper();
         ProcessResult result = new ProcessResult();
         result.resultMat = inputFrame;
 
-        Mat whiteSquare = new Mat(myHeight, myHeight, inputFrame.type(), new Scalar(255, 255, 255));
+        // Clear white square
+        whiteSquare.setTo(new Scalar(255, 255, 255));
+
 
         // Create timer to measure processing time
         long startTime = System.currentTimeMillis();
 
         // Draw text center frame
         String textDisplay = "";
+
         // Convert the image to grayscale
-        Mat grayImage = new Mat();
         Imgproc.cvtColor(inputFrame, grayImage, Imgproc.COLOR_RGBA2GRAY);
         Imgproc.GaussianBlur(grayImage, grayImage, new Size(5, 5), 0);
 
-        // Threshold the image to create a binary image
-        Mat binaryImage = new Mat();
+        // Use threshold to convert the image to black and white
         Imgproc.adaptiveThreshold(grayImage, binaryImage, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 10);
 
-        // Clear area
+        // Clear unuse area
         {
             Rect areaClear = new Rect(0, rects[0].height,
                     rects[1].x, rects[2].y - rects[0].height);
@@ -294,7 +138,6 @@ public class Scanner {
         Rect paperCorner = new Rect(cornerTL, cornerBR);
 
         // Use Canny edge detector to find edges in the image
-        Mat edges = new Mat();
         Imgproc.Canny(binaryImage, edges, 50, 200);
 
         // Dilate the edges to close gaps in contours
@@ -302,7 +145,6 @@ public class Scanner {
 
         // Find contours in the image
         List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
         Imgproc.findContours(edges, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
         Log.d("MyLog", "Time to find contours: " + (System.currentTimeMillis() - startTime) + "ms");
 
@@ -339,8 +181,10 @@ public class Scanner {
                 }
             }
         }
-        // Sort markerIndexes
-        sort(markerIndexes);
+
+        // Sắp xếp danh sách các số theo thứ tự tăng dần
+        markerIndexes.sort(Comparator.comparingInt(o -> o));
+
         for (int i = markerIndexes.size() - 1; i >= 0; i--){
             markers.remove((int)markerIndexes.get(i));
         }
@@ -396,13 +240,13 @@ public class Scanner {
         for (Point point : rightPoints){
             rightPointsClone.add(new Point(point.y, point.x));
         }
-        rightPointsClone = verifyTopPoint(rightPointsClone, template.fixedRight, 5, false);
+        rightPointsClone = GeometryUtil.verifyTopPoint(rightPointsClone, template.fixedRight, 5, false);
 
         rightPoints.clear();
         for (Point point : rightPointsClone){
             rightPoints.add(new Point(point.y, point.x));
         }
-        topPoints = verifyTopPoint(topPoints, template.fixedTop, 10, true);
+        topPoints = GeometryUtil.verifyTopPoint(topPoints, template.fixedTop, 10, true);
 
         if (topPoints.size() < template.fixedTop || rightPoints.size() < template.fixedRight){
             textDisplay += "Chua tim duoc diem tham chieu";
@@ -442,7 +286,7 @@ public class Scanner {
         Imgproc.circle(inputFrame, br, 12, new Scalar(255, 0, 0), 2);
 
         final int DeltaAngle = 7;
-        double newAngleTR = calculateAngle(tl, tr, br);
+        double newAngleTR = GeometryUtil.calculateAngle(tl, tr, br);
         if (Math.abs(newAngleTR - 90) > DeltaAngle){
             textDisplay = "Goc chua dung, vui long can chinh lai camera";
             Imgproc.putText(whiteSquare, textDisplay, new Point(40, 60), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
@@ -457,7 +301,7 @@ public class Scanner {
         double minDeltaAngle = 9999;
         for (int i = 0; i < bottomLeftPoints.size(); i++){
             Point point = bottomLeftPoints.get(i);
-            double angle = calculateAngle(tl, point, br);
+            double angle = GeometryUtil.calculateAngle(tl, point, br);
             double deltaAngle = Math.abs(angle - newAngleTR);
             if (deltaAngle < minDeltaAngle){
                 minDeltaAngle = deltaAngle;
@@ -512,7 +356,7 @@ public class Scanner {
             return result;
         }
 
-        calculateVHLines(tl, tr, br, bl);
+        grid.calculateVHLines(tl, tr, br, bl);
 
         for (int sectionIndex = 0; sectionIndex < template.sectionAreas.size(); sectionIndex++){
 
@@ -530,8 +374,8 @@ public class Scanner {
             for (int row = 0; row < numRow; row++) {
                 marks[row] = new PointMark[numCol];
                 for (int col = 0; col < numCol; col++) {
-                    Point ref1 = getRefPoint(xMin + (xMax - xMin) * col / numCol, yMin + (yMax - yMin) * row / numRow);
-                    Point ref3 = getRefPoint(xMin + (xMax - xMin) * (col + 1) / numCol, yMin + (yMax - yMin) * (row + 1) / numRow);
+                    Point ref1 = grid.getRefPoint(xMin + (xMax - xMin) * col / numCol, yMin + (yMax - yMin) * row / numRow);
+                    Point ref3 = grid.getRefPoint(xMin + (xMax - xMin) * (col + 1) / numCol, yMin + (yMax - yMin) * (row + 1) / numRow);
 
                     Rect interest = new Rect(ref1, ref3);
                     Mat roi = new Mat(grayImage, interest);
@@ -702,13 +546,14 @@ public class Scanner {
                 examCode += "_";
             }
         }
+        examPaper.examCode = examCode;
         // Tìm kiếm bài thi có mã đề bằng examCode
         QuestionPaper questionPaperFound = null;
         String txtDeThi = "";
         if (examination != null){
-            for (QuestionPaper dethi: examination.questionPapers){
-                if (dethi.paperCode.equals(examCode)){
-                    questionPaperFound = dethi;
+            for (QuestionPaper qp: examination.questionPapers){
+                if (qp.paperCode != null && qp.paperCode.equals(examCode)){
+                    questionPaperFound = qp;
                     break;
                 }
             }
@@ -738,8 +583,8 @@ public class Scanner {
                     double yMax = sectionArea.yMax;
                     int numRow = sectionArea.numRow;
                     int numCol = sectionArea.numCol;
-                    Point ref1 = getRefPoint(xMin + (xMax - xMin) * col / numCol, yMin + (yMax - yMin) * row / numRow);
-                    Point ref3 = getRefPoint(xMin + (xMax - xMin) * (col + 1) / numCol, yMin + (yMax - yMin) * (row + 1) / numRow);
+                    Point ref1 = grid.getRefPoint(xMin + (xMax - xMin) * col / numCol, yMin + (yMax - yMin) * row / numRow);
+                    Point ref3 = grid.getRefPoint(xMin + (xMax - xMin) * (col + 1) / numCol, yMin + (yMax - yMin) * (row + 1) / numRow);
                     Point center = new Point((ref1.x + ref3.x) / 2, (ref1.y + ref3.y) / 2);
                     if (expected.equals(actual)) {
                         Imgproc.circle(inputFrame, center, 10, new Scalar(0, 255, 0), 2);
@@ -761,8 +606,8 @@ public class Scanner {
                     double yMax = sectionArea.yMax;
                     int numRow = sectionArea.numRow;
                     int numCol = sectionArea.numCol;
-                    Point ref1 = getRefPoint(xMin + (xMax - xMin) * col / numCol, yMin + (yMax - yMin) * row / numRow);
-                    Point ref3 = getRefPoint(xMin + (xMax - xMin) * (col + 1) / numCol, yMin + (yMax - yMin) * (row + 1) / numRow);
+                    Point ref1 = grid.getRefPoint(xMin + (xMax - xMin) * col / numCol, yMin + (yMax - yMin) * row / numRow);
+                    Point ref3 = grid.getRefPoint(xMin + (xMax - xMin) * (col + 1) / numCol, yMin + (yMax - yMin) * (row + 1) / numRow);
                     Point center = new Point((ref1.x + ref3.x) / 2, (ref1.y + ref3.y) / 2);
                     if (expected.equals(actual)) {
                         Imgproc.circle(inputFrame, center, 10, new Scalar(0, 255, 0), 2);
@@ -773,6 +618,9 @@ public class Scanner {
                 for (int i = 0; i < dapAnP3.length && i < p3.length(); i++) {
                     String actual = p3.charAt(i) + "";
                     String expected = dapAnP3[i];
+                    if (expected.equals("_")){
+                        continue;
+                    }
                     int sectionIndex = i / 4 + 14;
                     int row = 3 - (i % 4);
                     int col = "-,0123456789".indexOf(p3.charAt(i));
@@ -783,9 +631,10 @@ public class Scanner {
                     double yMax = sectionArea.yMax;
                     int numRow = sectionArea.numRow;
                     int numCol = sectionArea.numCol;
-                    Point ref1 = getRefPoint(xMin + (xMax - xMin) * col / numCol, yMin + (yMax - yMin) * row / numRow);
-                    Point ref3 = getRefPoint(xMin + (xMax - xMin) * (col + 1) / numCol, yMin + (yMax - yMin) * (row + 1) / numRow);
+                    Point ref1 = grid.getRefPoint(xMin + (xMax - xMin) * col / numCol, yMin + (yMax - yMin) * row / numRow);
+                    Point ref3 = grid.getRefPoint(xMin + (xMax - xMin) * (col + 1) / numCol, yMin + (yMax - yMin) * (row + 1) / numRow);
                     Point center = new Point((ref1.x + ref3.x) / 2, (ref1.y + ref3.y) / 2);
+
                     if (expected.equals(actual)) {
                         Imgproc.circle(inputFrame, center, 10, new Scalar(0, 255, 0), 2);
                     } else {
@@ -821,7 +670,7 @@ public class Scanner {
             ExamResult examResult = new ExamResult(examPaper.studentId,
                     examination.id,
                     examPaper.examCode,
-                    matToBitmap(inputFrame),
+                    BitmapUtil.matToBitmap(inputFrame),
                     new String[] { examPaper.chapter1Answer, examPaper.chapter2Answer, examPaper.chapter3Answer },
                     true
             );
@@ -836,24 +685,4 @@ public class Scanner {
     }
 
 
-    public Bitmap matToBitmap(Mat mat) {
-        Bitmap bmp = null;
-        Mat tmp = mat.clone();
-        try {
-            bmp = Bitmap.createBitmap(tmp.cols(), tmp.rows(), Bitmap.Config.ARGB_8888);
-            org.opencv.android.Utils.matToBitmap(tmp, bmp);
-        } catch (CvException e) {
-            Log.d("Exception", e.getMessage());
-        }
-        org.opencv.android.Utils.matToBitmap(mat, bmp);
-
-        return bmp;
-    }
-
-    public static Mat bitmapToMat(Bitmap bmp) {
-        Mat mat = new Mat();
-        Bitmap bmp32 = bmp.copy(Bitmap.Config.ARGB_8888, true);
-        org.opencv.android.Utils.bitmapToMat(bmp32, mat);
-        return mat;
-    }
 }

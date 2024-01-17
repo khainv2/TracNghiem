@@ -38,6 +38,10 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         //lấy vị trí của bài thi trong intent gửi đến
         examId = getIntent().getIntExtra(DatabaseManager.ARG_P_BAI_THI, 0);
 
+        // Remove all exam results
+//        DatabaseManager.examResults.clear();
+
+
         LinearLayout content = findViewById(R.id.content);
         LayoutInflater inflater = LayoutInflater.from(this);
 
@@ -66,11 +70,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 .setIconRes(R.drawable.ic_show_chart_black_24dp)
                 .setOnClickListenter(this, F_THONG_KE)
                 .getView());
-        content.addView(new FuncView(inflater)
-                .setText("Thông tin")
-                .setIconRes(R.drawable.ic_error_black_24dp)
-                .setOnClickListenter(this, F_THONG_TIN)
-                .getView());
+//        content.addView(new FuncView(inflater)
+//                .setText("Thông tin")
+//                .setIconRes(R.drawable.ic_error_black_24dp)
+//                .setOnClickListenter(this, F_THONG_TIN)
+//                .getView());
     }
 
     @Override
@@ -119,6 +123,9 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             }
             case F_THONG_KE:
+                Intent intent = new Intent(this, StatisticActivity.class)
+                        .putExtra(DatabaseManager.ARG_P_BAI_THI, examId);
+                startActivity(intent);
                 break;
             case F_THONG_TIN:
                 break;
