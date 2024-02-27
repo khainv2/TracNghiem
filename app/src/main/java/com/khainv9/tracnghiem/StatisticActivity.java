@@ -125,7 +125,7 @@ public class StatisticActivity extends AppCompatActivity {
                 }
             }
         }
-
+//
 //        // Create fake data for all ranges
 //        countPerRange.set(0, 10);
 //        countPerRange.set(1, 5);
@@ -133,9 +133,7 @@ public class StatisticActivity extends AppCompatActivity {
 //        countPerRange.set(3, 7);
 //        countPerRange.set(4, 7);
 //        countPerRange.set(5, 6);
-
-
-
+        
         ArrayList<PieEntry> values = new ArrayList<>();
         for (int i = 0; i < ranges.size(); i++) {
             int count = countPerRange.get(i);
@@ -155,11 +153,17 @@ public class StatisticActivity extends AppCompatActivity {
 
         PieData data = new PieData(set1);
         data.setValueTextSize(10f);
+//
+//        map.put("1", new ExamResult());
+//        map.put("1", new ExamResult());
+//        map.put("1", new ExamResult());
+//        map.put("1", new ExamResult());
+//        map.put("1", new ExamResult());
+//        map.put("1", new ExamResult());
 
         data.setValueFormatter(new ValueFormatter() {
             @Override
             public String getPieLabel(float value, PieEntry pieEntry) {
-//                return "" + (int) value + " (" + String.format("%.2f", value / 55 * 100) + "%)";
                 return "" + (int) value + " (" + String.format("%.2f", value / map.size() * 100) + "%)";
             }
         });
