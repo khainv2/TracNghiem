@@ -81,7 +81,9 @@ public class ExamResult {
                 count++;
             }
             if (i % 4 == 3){
-                if (count == 2){
+                if (count == 1){
+                    diemP2 += 0.1;
+                } else if (count == 2){
                     diemP2 += 0.25;
                 } else if (count == 3){
                     diemP2 += 0.5;
@@ -103,7 +105,7 @@ public class ExamResult {
             }
             if (i % 4 == 3){
                 if (count == 4){
-                    diemP3 += 0.25;
+                    diemP3 += examination.isMathSubject ? 0.5 : 0.25;
                 }
                 count = 0;
             }
