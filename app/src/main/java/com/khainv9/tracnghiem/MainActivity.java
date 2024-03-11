@@ -2,6 +2,8 @@ package com.khainv9.tracnghiem;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,8 +28,19 @@ import com.khainv9.tracnghiem.adapter.BaiThiAdapter;
 import com.khainv9.tracnghiem.adapter.DiemThiAdapter;
 import com.khainv9.tracnghiem.adapter.HocSinhAdapter;
 import com.khainv9.tracnghiem.app.DatabaseManager;
+import com.khainv9.tracnghiem.app.ExcelUtil;
+import com.khainv9.tracnghiem.app.FileUtil;
 import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.Student;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -39,6 +53,7 @@ public class MainActivity extends AppCompatActivity
     Toolbar toolbar;
     int idSelected;
 
+    private static final int FILE_SELECT_CODE = 1331;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -246,7 +261,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void createWindowThemBaiThi() {
-
         View v = getLayoutInflater().inflate(R.layout.screen_bai_moi, null);
         final EditText tvTenBai = v.findViewById(R.id.ed_bai),
                 edPhan1 = v.findViewById(R.id.ed_p1),
@@ -319,8 +333,62 @@ public class MainActivity extends AppCompatActivity
             }
             return true;
         }
+        if (id == R.id.action_import){
+            switch (idSelected) {
+                case R.id.nav_hoc_sinh:
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("*/*");
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
 
+                    try {
+                        startActivityForResult(
+                                Intent.createChooser(intent, "Select a File to Upload"),
+                                FILE_SELECT_CODE);
+                    } catch (android.content.ActivityNotFoundException ex) {
+                        // Potentially direct the user to the Market with a Dialog
+                        Toast.makeText(this, "Please install a File Manager.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+
+                    adapter.notifyDataSetChanged();
+                    break;
+            }
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FILE_SELECT_CODE:
+                if (resultCode == RESULT_OK) {
+                    // Get the Uri of the selected file
+                    Uri uri = data.getData();
+                    Log.d("MyLog", "File Uri: " + uri.toString());
+                    // Get the path
+                    String path = FileUtil.getFileAbsolutePath(this, uri);
+                    Log.d("MyLog", "File Path: " + path);
+                    // Read excel using apache POI
+                    boolean ret = ExcelUtil.readExcel(path);
+                    if (ret){
+                        Toast.makeText(this, "Nhập dữ liệu học sinh thành công", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Lỗi đọc file", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        MenuItem itemImport = menu.findItem(R.id.action_import);
+        itemImport.setVisible(idSelected == R.id.nav_hoc_sinh);
+        return true;
     }
 
     @SuppressLint("RestrictedApi")

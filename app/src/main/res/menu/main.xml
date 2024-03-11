@@ -6,4 +6,9 @@
         android:orderInCategory="100"
         android:title="Xóa tất cả"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_import"
+        android:orderInCategory="100"
+        android:title="Nhập từ file excel"
+        app:showAsAction="never" />
 </menu>
