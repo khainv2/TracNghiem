@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -88,10 +89,12 @@ public class MainActivity extends AppCompatActivity
                 edPhan2 = v.findViewById(R.id.ed_p2),
                 edPhan3 = v.findViewById(R.id.ed_p3),
                 edTotal = v.findViewById(R.id.ed_number_total);
+        final CheckBox cbShortMath = v.findViewById(R.id.cb_SortMath);
         edPhan1.setText(examination.chapterACount + "");
         edPhan2.setText(examination.chapterBCount + "");
         edPhan3.setText(examination.chapterCCount + "");
-        syncDiemBaiThi(edPhan1, edPhan2, edPhan3, edTotal);
+        cbShortMath.setChecked(examination.isMathSubject);
+        syncDiemBaiThi(edPhan1, edPhan2, edPhan3, edTotal, cbShortMath);
         tvTenBai.setText(examination.name);
         new AlertDialog.Builder(this)
                 .setTitle("Sửa bài thi")
@@ -109,6 +112,7 @@ public class MainActivity extends AppCompatActivity
                     examination.chapterACount = p1;
                     examination.chapterBCount = p2;
                     examination.chapterCCount = p3;
+                    examination.isMathSubject = cbShortMath.isChecked();
                     DatabaseManager.update(examination);
                     adapter.notifyDataSetChanged();
                 })
@@ -191,12 +195,16 @@ public class MainActivity extends AppCompatActivity
                 .create();
     }
 
-    private String getTotal(String p1, String p2, String p3) {
+    private String getTotal(String p1, String p2, String p3, boolean isShortMath) {
         try {
             int s1 = Integer.parseInt(p1);
             int s2 = Integer.parseInt(p2);
             int s3 = Integer.parseInt(p3);
-            return (s1 * 0.25) + s2 + (s3 * 0.25) + "";
+            if (isShortMath){
+                return (s1 * 0.25) + s2 + (s3 * 0.5) + "";
+            } else {
+                return (s1 * 0.25) + s2 + (s3 * 0.25) + "";
+            }
         } catch (Exception e) {
             return "";
         }
@@ -231,13 +239,13 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    void syncDiemBaiThi(EditText edPhan1, EditText edPhan2, EditText edPhan3, EditText edTotal){
+    void syncDiemBaiThi(EditText edPhan1, EditText edPhan2, EditText edPhan3, EditText edTotal, CheckBox cbShortMath){
 
         // On edit text change share for 3 edit text
         edPhan1.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 edTotal.setText(getTotal(edPhan1.getText().toString(),
-                        edPhan2.getText().toString(), edPhan3.getText().toString()));
+                        edPhan2.getText().toString(), edPhan3.getText().toString(), cbShortMath.isChecked()));
             }
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before,int count) {}
@@ -245,7 +253,7 @@ public class MainActivity extends AppCompatActivity
         edPhan2.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 edTotal.setText(getTotal(edPhan1.getText().toString(),
-                        edPhan2.getText().toString(), edPhan3.getText().toString()));
+                        edPhan2.getText().toString(), edPhan3.getText().toString(), cbShortMath.isChecked()));
             }
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before,int count) {}
@@ -253,10 +261,14 @@ public class MainActivity extends AppCompatActivity
         edPhan3.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 edTotal.setText(getTotal(edPhan1.getText().toString(),
-                        edPhan2.getText().toString(), edPhan3.getText().toString()));
+                        edPhan2.getText().toString(), edPhan3.getText().toString(), cbShortMath.isChecked()));
             }
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before,int count) {}
+        });
+        cbShortMath.setOnClickListener(v1 -> {
+            edTotal.setText(getTotal(edPhan1.getText().toString(),
+                    edPhan2.getText().toString(), edPhan3.getText().toString(), cbShortMath.isChecked()));
         });
     }
 
@@ -267,7 +279,9 @@ public class MainActivity extends AppCompatActivity
                 edPhan2 = v.findViewById(R.id.ed_p2),
                 edPhan3 = v.findViewById(R.id.ed_p3),
                 edTotal = v.findViewById(R.id.ed_number_total);
-        syncDiemBaiThi(edPhan1, edPhan2, edPhan3, edTotal);
+        final CheckBox cbShortMath = v.findViewById(R.id.cb_SortMath);
+
+        syncDiemBaiThi(edPhan1, edPhan2, edPhan3, edTotal, cbShortMath);
         taoBaiThi = new AlertDialog.Builder(this)
                 .setTitle("Thêm bài mới")
                 .setView(v)
@@ -281,8 +295,9 @@ public class MainActivity extends AppCompatActivity
                         int p1 = Integer.parseInt(edPhan1.getText().toString());
                         int p2 = Integer.parseInt(edPhan2.getText().toString());
                         int p3 = Integer.parseInt(edPhan3.getText().toString());
+                        boolean isShortMath = cbShortMath.isChecked();
                         String sTen = tvTenBai.getText().toString();
-                        Examination examination = new Examination(sTen, p1, p2, p3);
+                        Examination examination = new Examination(sTen, p1, p2, p3, isShortMath);
                         DatabaseManager.update(examination);
                         adapter.notifyDataSetChanged();
                     }

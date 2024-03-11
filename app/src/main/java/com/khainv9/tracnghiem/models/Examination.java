@@ -17,7 +17,7 @@ public class Examination {
     public int chapterACount;
     public int chapterBCount;
     public int chapterCCount;
-
+    public boolean isMathSubject;
     public List<QuestionPaper> questionPapers;
 
     public Examination(){}
@@ -32,6 +32,10 @@ public class Examination {
         this.chapterACount = chapterACount;
         this.chapterBCount = chapterBCount;
         this.chapterCCount = chapterCCount;
+    }
+    public Examination(String name, int chapterACount, int chapterBCount, int chapterCCount, boolean isMathSubject) {
+        this(name, chapterACount, chapterBCount, chapterCCount);
+        this.isMathSubject = isMathSubject;
     }
 
     public long getLNgayTao() {
