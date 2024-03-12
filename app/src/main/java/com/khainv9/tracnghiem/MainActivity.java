@@ -34,11 +34,6 @@ import com.khainv9.tracnghiem.app.FileUtil;
 import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.Student;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -385,9 +380,13 @@ public class MainActivity extends AppCompatActivity
                     String path = FileUtil.getFileAbsolutePath(this, uri);
                     Log.d("MyLog", "File Path: " + path);
                     // Read excel using apache POI
-                    boolean ret = ExcelUtil.readExcel(path);
-                    if (ret){
+                    ExcelUtil.Result ret = ExcelUtil.readExcel(path);
+                    if (ret.success){
+                        for (Student student : ret.students){
+                            DatabaseManager.update(student);
+                        }
                         Toast.makeText(this, "Nhập dữ liệu học sinh thành công", Toast.LENGTH_SHORT).show();
+                        adapter.notifyDataSetChanged();
                     } else {
                         Toast.makeText(this, "Lỗi đọc file", Toast.LENGTH_SHORT).show();
                     }

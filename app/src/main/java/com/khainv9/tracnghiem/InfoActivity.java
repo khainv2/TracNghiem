@@ -5,16 +5,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import com.khainv9.tracnghiem.adapter.DiemThiAdapter;
 import com.khainv9.tracnghiem.app.DatabaseManager;
+import com.khainv9.tracnghiem.app.ExcelUtil;
 import com.khainv9.tracnghiem.models.Examination;
 import com.khainv9.tracnghiem.models.ExamResult;
 import com.khainv9.tracnghiem.models.Student;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,6 +129,7 @@ public class InfoActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.export, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -132,6 +138,21 @@ public class InfoActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                break;
+            case R.id.action_export:
+                String pattern = "yyMMdd_HHmmss"; // + examination.name
+                String fileName = "DiemThi_"  + examination.name + "_" + android.text.format.DateFormat.format(pattern, new java.util.Date()) + ".xlsx";
+//                fileName = "myfile.xlsx";
+//                File folder = Environment.getExternalStorageDirectory();
+//                if (!folder.exists())
+//                    folder.mkdirs();
+//                String totalPath = folder.getAbsolutePath() + "/" + fileName;
+                boolean ret = ExcelUtil.writeExcel(this, fileName, diemThiAdapter.ds);
+                if (ret){
+                    Toast.makeText(this, "Xuất file thành công tại đường dẫn " + fileName, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Xuất file thất bại", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);

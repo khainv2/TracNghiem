@@ -23,7 +23,7 @@ import java.util.List;
 public class DiemThiAdapter extends RecyclerView.Adapter<DiemThiAdapter.DTVH>
         implements View.OnClickListener, View.OnLongClickListener {
 
-    List<ExamResult> ds;
+    public List<ExamResult> ds;
 
     public DiemThiAdapter(List<ExamResult> dsExamResult) {
         ds = dsExamResult;
